@@ -1,0 +1,98 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+nodes = {
+    'NODE1' => [2, 1, 3, 22203],
+    'NODE2' => [2, 2, 4, 22204]    
+}           
+
+# eth1, eth2 ==> MGMT Interface
+# eth3, eth4 ==> HYBRID Interface
+switches = {
+	'TOR_SW' => [7, 22211]
+}
+
+nic_type="virtio"
+#nic_type="82540EM"
+#nic_type="82545EM"
+intnet_name="veos1"
+
+# Vagrantfile API/syntax version. Don't touch unless you know what you're doing!
+VAGRANTFILE_API_VERSION = "2"
+
+Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
+  
+  nodes.each do |hostname, (intf_count, intf_start, intf_end, ssh_nat_port)|
+  	
+  	config.vm.define "#{hostname}" do |cfg_node|
+  	  #cfg_node.vm.box = "hashicorp/precise64"
+  	  cfg_node.vm.box = "myubuntu"
+  	  cfg_node.vm.boot_timeout = 300
+  	  
+  	  # Run our shell script on provisioning
+      cfg_node.vm.provision :shell, :path => "init_node_#{hostname}.sh"
+  	
+      # NAT이외에 intnet 인터페이스 2개를 생성
+      # switch_interface 1 과 2에 연결
+      #for i in intf_start..intf_end
+      for i in [intf_start, intf_end]
+  	    cfg_node.vm.network "private_network", auto_config: false, virtualbox__intnet: "#{intnet_name}_switch_interface_#{i}"  	
+      end
+      
+      # From interface 2 to intf_count, set nictype to virtio
+      cfg_node.vm.provider "virtualbox" do |v|
+        for i in 2..(intf_count+1)
+          v.customize ["modifyvm", :id, "--nictype#{i}", "#{nic_type}"] 
+  	end
+  	#v.customize ["modifyvm", :id, "--chipset", "ich9"]
+  	v.customize ["modifyvm", :id, "--hpet", "on"]
+        #v.gui = true
+        v.memory = 2048
+  		v.cpus = 2
+  	  end  	  
+  	   
+  	  cfg_node.vm.network :forwarded_port, guest: 22, host: "#{ssh_nat_port}", id: "ssh"  
+    end
+  end
+  
+  
+  switches.each do |hostname, (intf_count, ssh_nat_port)|
+  
+    config.vm.define "#{hostname}" do |cfg_sw|
+      cfg_sw.vm.box = "vEOS"
+	  cfg_sw.vm.boot_timeout = 90
+	
+      cfg_sw.ssh.username = "vagrant"
+      cfg_sw.ssh.password = "vagrant"
+      #cfg_sw.ssh.insert_key = true
+      #cfg_sw.ssh.private_key_path="/home/vagrant/.ssh/id_rsa"
+    
+      # 여러 개의 인터페이스를 할당
+      # 최대 생성 가능한 8개 인터페이스 중 첫 번째는 NAT, 나머지 7개는 intnet에 할당
+      for i in 1..intf_count
+  	    cfg_sw.vm.network "private_network", auto_config: false, virtualbox__intnet: "#{intnet_name}_switch_interface_#{i}"  	
+      end
+  
+      #cfg_sw.vm.provision :shell, :path => "init_node_#{hostname}.sh"
+  	  # Virtualbox 구동시 GUI를 띄워주도록 설정m
+      # GUI를 띄우지 않으면 vEOS 수행 시 boot VM에서 hang이 걸림
+      # 스위칭에 이용하는 인터페이스에 대해서 promiscuous mode를 allow vms로 설정해줌
+      cfg_sw.vm.provider "virtualbox" do |v|
+        for i in 2..(intf_count+1)
+          v.customize ["modifyvm", :id, "--nictype#{i}", "#{nic_type}"] 
+  	  v.customize ["modifyvm", :id, "--nicpromisc#{i}", "allow-all"]  	        	      
+  	end
+  	#v.customize ["modifyvm", :id, "--chipset", "ich9"]
+  	v.customize ["modifyvm", :id, "--hpet", "on"]
+   	#v.gui = true
+   	v.memory = 2048
+  	v.cpus = 16
+      end
+      cfg_sw.vm.network :forwarded_port, guest: 22, host: "#{ssh_nat_port}", id: "ssh"
+  	
+      # synced folder를 disable 시킴
+      cfg_sw.vm.synced_folder ".", "/vagrant", disabled: true
+    end
+  end
+  
+end

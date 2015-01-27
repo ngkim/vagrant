@@ -1,0 +1,72 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+# Vagrantfile API/syntax version. Don't touch unless you know what you're doing!
+VAGRANTFILE_API_VERSION = "2"
+
+Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
+
+  config.vm.define "NODE1" do |cfg_node1|
+  	cfg_node1.vm.box = "ubuntu/trusty64"
+  	cfg_node1.vm.boot_timeout = 120
+  	
+  	# NAT이외에 intnet 인터페이스 2개를 생성
+  	# switch_interface 1 과 2에 연결
+    for i in 1..1
+  	  cfg_node1.vm.network "private_network", auto_config: false, virtualbox__intnet: "switch_interface_#{i}"  	
+    end
+    
+    cfg_node1.vm.provider "virtualbox" do |v|
+      v.gui = true
+  	end
+  end
+  
+  config.vm.define "NODE2" do |cfg_node2|
+  	cfg_node2.vm.box = "ubuntu/trusty64"
+  	cfg_node2.vm.boot_timeout = 120
+  	
+  	# NAT이외에 intnet 인터페이스 2개를 생성
+  	# switch_interface 3 과 4에 연결
+    for i in 2..2
+  	  cfg_node2.vm.network "private_network", auto_config: false, virtualbox__intnet: "switch_interface_#{i}"  	
+    end
+    
+    cfg_node2.vm.provider "virtualbox" do |v|
+      v.gui = true
+  	end
+  end
+
+  config.vm.define "TOR_SW" do |cfg_tor|
+    cfg_tor.vm.box = "vEOS"
+	cfg_tor.vm.boot_timeout = 120
+	
+    cfg_tor.ssh.username = "root"
+    cfg_tor.ssh.private_key_path="/home/vagrant/.ssh/id_rsa"
+    
+    # 여러 개의 인터페이스를 할당
+    # 최대 생성 가능한 8개 인터페이스 중 첫 번째는 NAT, 나머지 7개는 intnet에 할당
+    for i in 1..2
+  	  cfg_tor.vm.network "private_network", auto_config: false, virtualbox__intnet: "switch_interface_#{i}"  	
+    end
+  
+  	# Virtualbox 구동시 GUI를 띄워주도록 설정
+    # GUI를 띄우지 않으면 vEOS 수행 시 boot VM에서 hang이 걸림
+    # 스위칭에 이용하는 인터페이스에 대해서 promiscuous mode를 allow vms로 설정해줌
+    cfg_tor.vm.provider "virtualbox" do |v|
+      for i in 2..3
+  	    v.customize ["modifyvm", :id, "--nicpromisc#{i}", "allow-vms"]
+  	  end
+   	  v.gui = true
+  	end
+    # guest addition check를 disable
+    # vbguest라는 섹션을 모른다는 에러가 발생
+    #cfg_tor.vbguest.auto_update = false
+    #cfg_tor.vbguest.no_remote = true
+  
+    # synced folder를 disable 시킴
+    cfg_tor.vm.synced_folder ".", "/vagrant", disabled: true
+  end
+  
+
+  
+end
