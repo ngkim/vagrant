@@ -26,19 +26,17 @@ class Node
   end 
 end
 
-controller = Node.new("CTRL"	, [1,8]		, 22201)
-c_node_1   = Node.new("C-NODE-1", [2,9,15]	, 22202)
-user_node  = Node.new("USER"	, [16]		, 22203)
-serv_node  = Node.new("SERVER"	, [17]		, 22204)
+all_in_one = Node.new("ALL-ONE", [1,10,13]	, 22201)
+user_node  = Node.new("USER"	, [8]		, 22202)
+serv_node  = Node.new("SERVER"	, [9]		, 22203)
 
 mgmt_sw    = Node.new("MGMT-SW"	, (1..7)	, 22210)
-svc_sw     = Node.new("SVC-SW"	, (8..14)	, 22211)
-vnf_sw     = Node.new("VNF-SW"	, (15..20)	, 22212, "eth0")
+vnf_sw     = Node.new("VNF-SW"	, (8..14)	, 22211, "eth0")
 
-nodes = [ controller, c_node_1, user_node, serv_node ]
-switches = [ mgmt_sw, svc_sw, vnf_sw ]
+nodes = [ all_in_one, user_node, serv_node ]
+switches = [ mgmt_sw, vnf_sw ]
 
-# Controller의 80번 포트를 8888으로 nat
+# All-in-one의 80번 포트를 8888으로 nat
 link_prefix="openstack"
 http_nat_port=8888
 

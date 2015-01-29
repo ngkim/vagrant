@@ -3,7 +3,7 @@
 BR1="br-vnf"
 # Use VLAN 2000 for external network connection
 BR1_ITFS=("eth1" "eth2" "eth3" "eth4" "eth5" "eth6" "eth7")
-BR1_TAGS=(-1 11 10 -1 -1 -1 2000)
+BR1_TAGS=(11 10 -1 -1 -1 2000 2000)
 
 init_ovs() {
 	BR_NAME=$1
