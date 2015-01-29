@@ -31,7 +31,7 @@ user_node  = Node.new("USER"	, [8]		, 22202)
 serv_node  = Node.new("SERVER"	, [9]		, 22203)
 
 mgmt_sw    = Node.new("MGMT-SW"	, (1..7)	, 22210)
-vnf_sw     = Node.new("VNF-SW"	, (8..14)	, 22211, "eth0")
+vnf_sw     = Node.new("VNF-SW"	, (8..13)	, 22211, "eth0")
 
 nodes = [ all_in_one, user_node, serv_node ]
 switches = [ mgmt_sw, vnf_sw ]
