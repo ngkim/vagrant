@@ -10,8 +10,8 @@ init_ovs() {
 	sudo ovs-vsctl add-br $BR_NAME
 
 	for itf in ${BR_ITFS[@]}; do
-		sudo ifconfig $itf up
 		sudo ovs-vsctl add-port $BR_NAME $itf
+		sudo ifconfig $itf up
 	done
 }
 

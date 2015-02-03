@@ -16,12 +16,12 @@ init_ovs() {
                 itf=${BR_ITFS[$idx]}
                 tag=${BR_TAGS[$idx]}
 
-		sudo ifconfig $itf up
                 if [ "$tag" != "-1" ]; then
 		  sudo ovs-vsctl add-port $BR_NAME $itf tag=$tag
                 else
 		  sudo ovs-vsctl add-port $BR_NAME $itf
                 fi
+		sudo ifconfig $itf up
 	done
 }
 

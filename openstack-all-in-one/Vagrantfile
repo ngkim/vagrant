@@ -3,12 +3,12 @@
 
 require "../include/vnode.rb"
 
-all_in_one = Node.new("ALL-ONE", [1,10,13]	, 8, 8192, 22201, 22280)
+all_in_one = Node.new("ALL-ONE" , [1,10,13]	, 8, 8192, 22201, 22280, 26080)
 user_node  = Node.new("USER"	, [8]		, 2, 2048, 22202)
 serv_node  = Node.new("SERVER"	, [9]		, 2, 2048, 22203)
 
-mgmt_sw    = Node.new("MGMT-SW"	, (1..7)	, 4, 2048, 222210)
-vnf_sw     = Node.new("VNF-SW"	, (8..13)	, 4, 2048, 22211, -1, "eth0")
+mgmt_sw    = Node.new("MGMT-SW"	, (1..7)	, 4, 2048, 22210)
+vnf_sw     = Node.new("VNF-SW"	, (8..13)	, 4, 2048, 22211, -1, -1, "eth0")
 
 nodes = [ all_in_one, user_node, serv_node ]
 switches = [ mgmt_sw, vnf_sw ]
@@ -27,10 +27,13 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     memory 		= node.get_memory
     ssh_nat_port 	= node.get_ssh_nat_port
     http_nat_port 	= node.get_http_nat_port
+    novnc_nat_port 	= node.get_novnc_nat_port
     interfaces 		= node.get_interfaces
 
+    interface_count	= interfaces.length 
+ 
     config.vm.define "#{hostname}" do |cfg_node|
-      cfg_node.vm.box = "myubuntu"
+      cfg_node.vm.box = "ubuntu/trusty64"
       cfg_node.vm.boot_timeout = 300
       # Run our shell script on provisioning
       cfg_node.vm.provision :shell, :path => "init_node_#{hostname}.sh"
@@ -45,9 +48,10 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
       # TODO:
       # From interface 2 to intf_count, set nictype to virtio
       cfg_node.vm.provider "virtualbox" do |v|
-      #  for i in 2..(intf_count+1)
-      #    v.customize ["modifyvm", :id, "--nictype#{i}", "virtio"] 
-      #	end
+        for i in 2..(interface_count+1)
+        # v.customize ["modifyvm", :id, "--nictype#{i}", "virtio"] 
+  	  v.customize ["modifyvm", :id, "--nicpromisc#{i}", "allow-all"]  	        	      
+      	end
   	v.customize ["modifyvm", :id, "--hpet", "on"]
         #v.gui = true
         v.memory = memory
@@ -57,6 +61,9 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
       cfg_node.vm.network :forwarded_port, guest: 22, host: "#{ssh_nat_port}", id: "ssh"  
       if http_nat_port != -1
         cfg_node.vm.network :forwarded_port, guest: 80, host: "#{http_nat_port}", id: "http"  
+      end
+      if novnc_nat_port != -1
+        cfg_node.vm.network :forwarded_port, guest: 6080, host: "#{novnc_nat_port}", id: "novnc"  
       end
     end
   end
@@ -68,6 +75,11 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     bridged_interface 	= switch.get_bridged_interface
     cpu 		= switch.get_cpu
     memory 		= switch.get_memory
+
+    interface_count	= interfaces.size
+    if bridged_interface != ""
+      interface_count += 1
+    end
  
     config.vm.define "#{hostname}" do |cfg_sw|
       cfg_sw.vm.box = "ubuntu-ovs"
@@ -90,11 +102,10 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
       # 스위칭에 이용하는 인터페이스에 대해서 promiscuous mode를 allow vms로 설정해줌
       cfg_sw.vm.provider "virtualbox" do |v|
         # TODO:
-        #for i in 2..(intf_count+1)
-        #  v.customize ["modifyvm", :id, "--nictype#{i}", "virtio"]
-        #  v.customize ["modifyvm", :id, "--nictype#{i}", "virtio"]
-  	#  v.customize ["modifyvm", :id, "--nicpromisc#{i}", "allow-all"]  	        	      
-  	#end
+        for i in 2..(interface_count + 1)
+        # v.customize ["modifyvm", :id, "--nictype#{i}", "virtio"]
+  	  v.customize ["modifyvm", :id, "--nicpromisc#{i}", "allow-all"]  	        	      
+  	end
   	v.customize ["modifyvm", :id, "--hpet", "on"]
    	#v.gui = true
    	v.memory = memory
