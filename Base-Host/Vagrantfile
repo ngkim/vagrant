@@ -1,0 +1,24 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+# Vagrantfile API/syntax version. Don't touch unless you know what you're doing!
+VAGRANTFILE_API_VERSION = "2"
+
+Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
+
+  config.vm.define "NODE1" do |cfg_node1|
+    cfg_node1.vm.box = "ubuntu/trusty64"
+    cfg_node1.vm.boot_timeout = 120
+  	
+    # NAT이외에 intnet 인터페이스 2개를 생성
+    # switch_interface 1 과 2에 연결
+    for i in 1..1
+      cfg_node1.vm.network "private_network", auto_config: false, virtualbox__intnet: "vm_switch_interface_#{i}"  	
+    end
+    
+    cfg_node1.vm.provider "virtualbox" do |v|
+      #v.gui = true
+    end
+  end
+  
+end

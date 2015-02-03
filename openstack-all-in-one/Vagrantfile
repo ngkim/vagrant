@@ -1,44 +1,20 @@
 # -*- mode: ruby -*-
 # vi: set ft=ruby :
 
-class Node
-  def initialize(hostname, internal_interfaces, ssh_nat_port, bridged_interface = "")
-    @hostname=hostname
-    @interfaces=internal_interfaces
-    @ssh_nat_port=ssh_nat_port
-    @bridged_interface=bridged_interface
-  end 
+require "../include/vnode.rb"
 
-  def get_hostname
-    return "#{@hostname}"
-  end 
+all_in_one = Node.new("ALL-ONE", [1,10,13]	, 8, 8192, 22201, 22280)
+user_node  = Node.new("USER"	, [8]		, 2, 2048, 22202)
+serv_node  = Node.new("SERVER"	, [9]		, 2, 2048, 22203)
 
-  def get_interfaces
-    return @interfaces
-  end 
-
-  def get_ssh_nat_port
-    return @ssh_nat_port
-  end 
-
-  def get_bridged_interface
-    return @bridged_interface
-  end 
-end
-
-all_in_one = Node.new("ALL-ONE", [1,10,13]	, 22201)
-user_node  = Node.new("USER"	, [8]		, 22202)
-serv_node  = Node.new("SERVER"	, [9]		, 22203)
-
-mgmt_sw    = Node.new("MGMT-SW"	, (1..7)	, 22210)
-vnf_sw     = Node.new("VNF-SW"	, (8..13)	, 22211, "eth0")
+mgmt_sw    = Node.new("MGMT-SW"	, (1..7)	, 4, 2048, 222210)
+vnf_sw     = Node.new("VNF-SW"	, (8..13)	, 4, 2048, 22211, -1, "eth0")
 
 nodes = [ all_in_one, user_node, serv_node ]
 switches = [ mgmt_sw, vnf_sw ]
 
 # All-in-one의 80번 포트를 8888으로 nat
 link_prefix="openstack"
-http_nat_port=8888
 
 # Vagrantfile API/syntax version. Don't touch unless you know what you're doing!
 VAGRANTFILE_API_VERSION = "2"
@@ -47,7 +23,10 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   
   nodes.each do | node |
     hostname 		= node.get_hostname
+    cpu 		= node.get_cpu
+    memory 		= node.get_memory
     ssh_nat_port 	= node.get_ssh_nat_port
+    http_nat_port 	= node.get_http_nat_port
     interfaces 		= node.get_interfaces
 
     config.vm.define "#{hostname}" do |cfg_node|
@@ -71,12 +50,14 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
       #	end
   	v.customize ["modifyvm", :id, "--hpet", "on"]
         #v.gui = true
-        v.memory = 2048
-        v.cpus = 2
+        v.memory = memory
+        v.cpus = cpu
       end  	  
   	   
       cfg_node.vm.network :forwarded_port, guest: 22, host: "#{ssh_nat_port}", id: "ssh"  
-      #cfg_node.vm.network :forwarded_port, guest: 80, host: "#{http_nat_port}", id: "http"  
+      if http_nat_port != -1
+        cfg_node.vm.network :forwarded_port, guest: 80, host: "#{http_nat_port}", id: "http"  
+      end
     end
   end
   
@@ -85,6 +66,8 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     ssh_nat_port 	= switch.get_ssh_nat_port
     interfaces 		= switch.get_interfaces
     bridged_interface 	= switch.get_bridged_interface
+    cpu 		= switch.get_cpu
+    memory 		= switch.get_memory
  
     config.vm.define "#{hostname}" do |cfg_sw|
       cfg_sw.vm.box = "ubuntu-ovs"
@@ -114,8 +97,8 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   	#end
   	v.customize ["modifyvm", :id, "--hpet", "on"]
    	#v.gui = true
-   	v.memory = 2048
-  	v.cpus = 4
+   	v.memory = memory
+  	v.cpus = cpu
       end
       cfg_sw.vm.network :forwarded_port, guest: 22, host: "#{ssh_nat_port}", id: "ssh"
   	
