@@ -114,7 +114,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
       cfg_sw.vm.network :forwarded_port, guest: 22, host: "#{ssh_nat_port}", id: "ssh"
   	
       # synced folder를 disable 시킴
-      cfg_sw.vm.synced_folder ".", "/vagrant", disabled: true
+      #cfg_sw.vm.synced_folder ".", "/vagrant", disabled: true
     end
   end
   
