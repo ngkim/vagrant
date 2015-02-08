@@ -1,5 +1,13 @@
 #!/bin/bash
 
+BR1="br-vnf"
+
+# Use VLAN 2000 for external network connection
+# BR1_MODE 0=access 1=trunk -1=not-added-to-ovs
+BR1_MODE=(     0      0            1      -1     -1      0      0)
+BR1_ITFS=("eth1" "eth2"       "eth3"  "eth4" "eth5" "eth6" "eth7")
+BR1_TAGS=(    11     10   10-89,2000      -1     -1   2000   2000)
+
 # make comma-separated string from a string for vlan trunk
 # example) "1-4,7,9" ==> 1,2,3,4,7,9
 str_trunk_to_comma() {
@@ -27,15 +35,6 @@ str_trunk_to_comma() {
 
 }
 
-# Use VLAN 2000 for external network connection
-# BR1_MODE 0=access 1=trunk -1=trunk-all-vlan
-
-BR1="br-vnf"
-
-BR1_ITFS=("eth1" "eth2"   "eth3" "eth4" "eth5" "eth6" "eth7")
-BR1_TAGS=(    11     10   10-89      -1     -1   2000   2000)
-BR1_MODE=(     0      0       1      -1     -1      0      0)
-
 init_ovs() {
 	BR_NAME=$1
 	declare -a BR_ITFS=("${!2}")
@@ -58,9 +57,6 @@ init_ovs() {
                   vlan_trunks=$(str_trunk_to_comma $tag)
                   echo "ovs-vsctl add-port $BR_NAME $itf trunk=$vlan_trunks"
 		  sudo ovs-vsctl add-port $BR_NAME $itf trunk=$vlan_trunks
-                else
-		  echo "ovs-vsctl add-port $BR_NAME $itf"
-		  sudo ovs-vsctl add-port $BR_NAME $itf
                 fi
 		sudo ifconfig $itf up
 	done
