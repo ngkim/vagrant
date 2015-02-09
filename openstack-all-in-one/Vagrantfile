@@ -63,6 +63,8 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
       if novnc_nat_port != -1
         cfg_node.vm.network :forwarded_port, guest: 6080, host: "#{novnc_nat_port}", id: "novnc"  
       end
+
+      cfg_node.vm.synced_folder "../openstack", "/root/openstack", disabled: false
     end
   end
   
