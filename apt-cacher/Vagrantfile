@@ -10,6 +10,8 @@ link_prefix="apt-cacher"
 server_node  = Node.new("CACHE-SERVER"	, [1], 2, 1024, 22351)
 client_node  = Node.new("CLIENT"	, [2], 2, 1024, 22352)
 
+apt_cache_nat_port=23142
+
 # switches - used for providing management network between SERVER and CLIENT
 mgmt_sw       = Node.new("MGMT-SW-OVS"	, (1..7), 4, 2048, 22362)
 #wan_sw      = Node.new("WAN-SW-OVS"	, (1..6), 4, 2048, 22362, -1, -1, "eth0")
@@ -113,6 +115,10 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
       end
       if novnc_nat_port != -1
         cfg_node.vm.network :forwarded_port, guest: 6080, host: "#{novnc_nat_port}", id: "novnc"  
+      end
+
+      if hostname == "CACHE-SERVER"
+        cfg_node.vm.network :forwarded_port, guest: 3142, host: "#{apt_cache_nat_port}", id: "apt-cache"  
       end
 
       #cfg_node.vm.synced_folder "../openstack", "/root/openstack", disabled: false
