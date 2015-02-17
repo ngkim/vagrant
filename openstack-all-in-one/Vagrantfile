@@ -64,7 +64,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
         cfg_node.vm.network :forwarded_port, guest: 6080, host: "#{novnc_nat_port}", id: "novnc"  
       end
 
-      cfg_node.vm.synced_folder "../openstack", "/root/openstack", disabled: false
+      #cfg_node.vm.synced_folder "../openstack", "/root/openstack", disabled: false
     end
   end
   
@@ -82,8 +82,11 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     end
  
     config.vm.define "#{hostname}" do |cfg_sw|
-      cfg_sw.vm.box = "ubuntu-ovs"
+      cfg_sw.vm.box = "ngkim/ubuntu-ovs"
       cfg_sw.vm.boot_timeout = 90
+
+      cfg_sw.ssh.username = "vagrant"
+      cfg_sw.ssh.password = "vagrant"
 	
       for i in interfaces
         cfg_sw.vm.network "private_network", auto_config: false, virtualbox__intnet: "#{link_prefix}_switch_interface_#{i}"  	
