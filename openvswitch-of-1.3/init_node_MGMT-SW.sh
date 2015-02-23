@@ -1,7 +1,6 @@
 #!/bin/bash
 
-
-############################################################
+###########################################################################
 # Author: Namgon Kim
 # Date: 2015. 02. 23
 #
@@ -11,50 +10,112 @@
 # * Follow instructions in 
 #   - http://sdnhub.org/tutorials/openflow-1-3/
 #
-############################################################
+###########################################################################
 
 BR0="br-mgmt"
 BR0_ITFS=(  "eth1"  "eth2"  "eth3"  "eth4"  "eth5"  "eth6"  "eth7")
 
-FLOW_RULE[0]="in_port=1,vlan_vid=10,actions=output:2"
-FLOW_RULE[1]="in_port=1,vlan_vid=20,actions=output:3"
-FLOW_RULE[2]="in_port=2,vlan_vid=10,actions=output:1"
-FLOW_RULE[3]="in_port=3,vlan_vid=20,actions=output:1"
+FLOW_RULES[0]="in_port=1 dl_vlan=10 group=2"
+FLOW_RULES[1]="in_port=1 dl_vlan=20 group=3"
+FLOW_RULES[2]="in_port=2 dl_vlan=10 group=1"
+FLOW_RULES[3]="in_port=3 dl_vlan=20 group=1"
+
+###########################################################################
+
+function run_commands() {
+	_green=$(tput setaf 2)
+	normal=$(tput sgr0)
+	
+	commands=$*
+	echo -e ${_green}${commands}${normal}
+	eval $commands
+	echo
+}
 
 init_ovs() {
 	BR_NAME=$1
 	declare -a BR_ITFS=("${!2}")
 
-	echo "ovs-vsctl add-br $BR_NAME"
-	sudo ovs-vsctl add-br $BR_NAME
+	cmd="sudo ovs-vsctl add-br $BR_NAME"
+	run_commands $cmd
 	
-	echo "ovs-vsctl set bridge $BR_NAME protocols=OpenFlow13"
-	sudo ovs-vsctl set bridge $BR_NAME protocols=OpenFlow13
+	cmd="sudo ovs-vsctl set bridge $BR_NAME protocols=OpenFlow13"
+	run_commands $cmd
 	
 	for itf in ${BR_ITFS[@]}; do
-		echo "ovs-vsctl add-port $BR_NAME $itf"
-		sudo ovs-vsctl add-port $BR_NAME $itf
+		cmd="sudo ovs-vsctl add-port $BR_NAME $itf"
+		run_commands $cmd
 		sudo ifconfig $itf up
+	done	
+}
+
+add_group() {
+	BR_NAME=$1
+	GRP_ID=$2
+	GRP_TYPE=$3
+	GRP_BUCKET=$4
+	
+	cmd="sudo ovs-ofctl -O Openflow13 add-group $BR_NAME \
+			group_id=$GRP_ID,type=$GRP_TYPE,bucket=$GRP_BUCKET"
+			
+	run_commands $cmd
+}
+
+add_groups() {
+	BR_NAME=$1
+	declare -a BR_ITFS=("${!2}")
+	
+	for idx in ${!BR_ITFS[@]}; do
+		add_group $BR_NAME $idx "all" "output:$idx"	
 	done
 	
 }
 
-add_forwarding_rules() {
+add_flow() {
 	BR_NAME=$1
-	declare -a FLOW_RULES=("${!2}")
+	IN_PORT=$2
+	DL_VLAN=$3
+	GRP_ID=$4
+	TBL_ID=$5
 	
-	for rule in ${FLOW_RULES[@]}; do
-		echo "ovs-ofctl -O Openflow13 add-flow $BR_NAME $rule"
-		sudo ovs-ofctl -O Openflow13 add-flow $BR_NAME $rule
+	if [ -z $TBL_ID ]; then
+		TBL_ID=0
+	fi
+	
+	cmd="sudo ovs-ofctl -O OpenFlow13 add-flow $BR_NAME \
+			 table=$TBL_ID,$IN_PORT,$DL_VLAN,actions=$GRP_ID"
+	run_commands $cmd
+}
+
+add_flows() {
+	BR_NAME=$1
+	declare -a FLOW_RULE=("${!2}")
+	
+	for flow in ${FLOW_RULE[@]}; do
+		in_port=`echo $flow | awk '{print $1}'`
+		dl_vlan=`echo $flow | awk '{print $2}'`
+		grp_id_=`echo $flow | awk '{print $3}'`
+		
+		add_flow $BR_NAME $in_port $dl_vlan $grp_id_	
 	done
 }
 
-dump_flow_rules() {
+dump_groups() {
 	BR_NAME=$1
-	echo "ovs-ofctl -O Openflow13 dump-flows $BR_NAME"
-	sudo ovs-ofctl -O Openflow13 dump-flows $BR_NAME
+	
+	cmd="sudo ovs-ofctl -O Openflow13 dump-groups $BR_NAME"
+	run_commands $cmd
 }
 
-init_ovs $BR0 BR0_ITFS[@]
-add_forwarding_rules $BR0 FLOW_RULE[@]
-dump_flow_rules $BR0
+dump_flows() {
+	BR_NAME=$1
+	
+	cmd="sudo ovs-ofctl -O Openflow13 dump-flows $BR_NAME"
+	run_commands $cmd
+}
+
+init_ovs    $BR0 BR0_ITFS[@]
+add_groups  $BR0 BR0_ITFS[@]
+add_flows   $BR0 FLOW_RULES[@]
+dump_groups $BR0
+dump_flows  $BR0
