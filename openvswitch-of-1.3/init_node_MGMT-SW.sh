@@ -28,14 +28,15 @@ init_ovs() {
 	echo "ovs-vsctl add-br $BR_NAME"
 	sudo ovs-vsctl add-br $BR_NAME
 	
+	echo "ovs-vsctl set bridge $BR_NAME protocols=OpenFlow13"
+	sudo ovs-vsctl set bridge $BR_NAME protocols=OpenFlow13
+	
 	for itf in ${BR_ITFS[@]}; do
 		echo "ovs-vsctl add-port $BR_NAME $itf"
 		sudo ovs-vsctl add-port $BR_NAME $itf
 		sudo ifconfig $itf up
 	done
 	
-	echo "ovs-vsctl set bridge $BR_NAME protocols=OpenFlow13"
-	sudo ovs-vsctl set bridge $BR_NAME protocols=OpenFlow13
 }
 
 add_forwarding_rules() {
