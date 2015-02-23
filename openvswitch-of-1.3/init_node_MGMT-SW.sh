@@ -89,10 +89,14 @@ add_flows() {
 	BR_NAME=$1
 	declare -a FLOW_RULE=("${!2}")
 	
-	for flow in ${FLOW_RULE[@]}; do
-		in_port=`echo $flow | awk '{print \$1}'`
-		dl_vlan=`echo $flow | awk '{print \$2}'`
-		grp_id_=`echo $flow | awk '{print \$3}'`
+	# use ${!FLOW_RULE[@]} instead of ${FLOW_RULE[@]}
+	# ${FLOW_RULE[@]}를 사용하면 bash가 빈칸으로 구분된 문자열을 배열 element로 인식  
+	for idx in ${!FLOW_RULE[@]}; do
+		flow=${FLOW_RULE[$idx]}
+		
+		in_port=`echo $flow | awk '{print $1}'`
+		dl_vlan=`echo $flow | awk '{print $2}'`
+		grp_id_=`echo $flow | awk '{print $3}'`
 		
 		add_flow $BR_NAME $in_port $dl_vlan $grp_id_	
 	done
