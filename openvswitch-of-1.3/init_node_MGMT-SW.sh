@@ -15,10 +15,10 @@
 BR0="br-mgmt"
 BR0_ITFS=(  "eth1"  "eth2"  "eth3"  "eth4"  "eth5"  "eth6"  "eth7")
 
-FLOW_RULES[0]="in_port=1 dl_vlan=10 group=2"
-FLOW_RULES[1]="in_port=1 dl_vlan=20 group=3"
-FLOW_RULES[2]="in_port=2 dl_vlan=10 group=1"
-FLOW_RULES[3]="in_port=3 dl_vlan=20 group=1"
+FLOW_RULES[1]="in_port=1 dl_vlan=10 group=2"
+FLOW_RULES[2]="in_port=1 dl_vlan=20 group=3"
+FLOW_RULES[3]="in_port=2 dl_vlan=10 group=1"
+FLOW_RULES[4]="in_port=3 dl_vlan=20 group=1"
 
 ###########################################################################
 
@@ -65,8 +65,10 @@ add_groups() {
 	BR_NAME=$1
 	declare -a BR_ITFS=("${!2}")
 	
-	for idx in ${!BR_ITFS[@]}; do
-		add_group $BR_NAME $idx "all" "output:$idx"	
+	for arr_idx in ${!BR_ITFS[@]}; do
+		# add 1 to arr_idx to make itf_idx start from 1
+		itf_idx=$((arr_idx + 1))
+		add_group $BR_NAME $idx "all" "output:$itf_idx"	
 	done
 	
 }
