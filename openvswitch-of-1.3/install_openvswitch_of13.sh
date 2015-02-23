@@ -57,6 +57,9 @@ echo "7. make install"
 sudo make install
 		
 echo "8. insmod openvswitch.ko"
+sudo modprobe vxlan
+sudo modprobe gre
+sudo modprobe libcrc32c
 sudo insmod datapath/linux/openvswitch.ko
 
 echo "9. start ovsdb-server"
