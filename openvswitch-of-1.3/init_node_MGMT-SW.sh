@@ -78,9 +78,7 @@ add_flow() {
 	GRP_ID=$4
 	TBL_ID=$5
 	
-	if [ -z $TBL_ID ]; then
-		TBL_ID=0
-	fi
+	if [ -z $TBL_ID ]; then TBL_ID=0; fi
 	
 	cmd="sudo ovs-ofctl -O OpenFlow13 add-flow $BR_NAME \
 			 table=$TBL_ID,$IN_PORT,$DL_VLAN,actions=$GRP_ID"
@@ -92,9 +90,9 @@ add_flows() {
 	declare -a FLOW_RULE=("${!2}")
 	
 	for flow in ${FLOW_RULE[@]}; do
-		in_port=`echo $flow | awk '{print $1}'`
-		dl_vlan=`echo $flow | awk '{print $2}'`
-		grp_id_=`echo $flow | awk '{print $3}'`
+		in_port=`echo $flow | awk '{print \$1}'`
+		dl_vlan=`echo $flow | awk '{print \$2}'`
+		grp_id_=`echo $flow | awk '{print \$3}'`
 		
 		add_flow $BR_NAME $in_port $dl_vlan $grp_id_	
 	done
