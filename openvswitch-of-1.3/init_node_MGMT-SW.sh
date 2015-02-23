@@ -40,9 +40,9 @@ init_ovs() {
 
 add_forwarding_rules() {
 	BR_NAME=$1
-	declare -a FLOW_RULE=("${!1}")
+	declare -a FLOW_RULES=("${!2}")
 	
-	for rule in ${FLOW_RULE[@]}; do
+	for rule in ${FLOW_RULES[@]}; do
 		echo "ovs-ofctl -O Openflow13 add-flow $BR_NAME $rule"
 		sudo ovs-ofctl -O Openflow13 add-flow $BR_NAME $rule
 	done
@@ -50,7 +50,7 @@ add_forwarding_rules() {
 
 dump_flow_rules() {
 	BR_NAME=$1
-	echo "sudo ovs-ofctl -O Openflow13 dump-flows $BR_NAME"
+	echo "ovs-ofctl -O Openflow13 dump-flows $BR_NAME"
 	sudo ovs-ofctl -O Openflow13 dump-flows $BR_NAME
 }
 
