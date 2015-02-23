@@ -68,7 +68,7 @@ add_groups() {
 	for arr_idx in ${!BR_ITFS[@]}; do
 		# add 1 to arr_idx to make itf_idx start from 1
 		itf_idx=$((arr_idx + 1))
-		add_group $BR_NAME $idx "all" "output:$itf_idx"	
+		add_group $BR_NAME $itf_idx "all" "output:$itf_idx"	
 	done
 	
 }
