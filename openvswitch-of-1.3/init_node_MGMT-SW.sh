@@ -14,7 +14,7 @@
 ############################################################
 
 BR0="br-mgmt"
-BR1_ITFS=(  "eth1"  "eth2"  "eth3"  "eth4"  "eth5"  "eth6"  "eth7")
+BR0_ITFS=(  "eth1"  "eth2"  "eth3"  "eth4"  "eth5"  "eth6"  "eth7")
 
 FLOW_RULE[0]="in_port=1,vlan_vid=10,actions=output:2"
 FLOW_RULE[1]="in_port=1,vlan_vid=20,actions=output:3"
