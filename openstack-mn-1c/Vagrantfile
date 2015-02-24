@@ -13,8 +13,8 @@ require "../include/vnode.rb"
 mgmt_sw    = Node.new("MGMT-SW" , (1..7)    , 4, 2048, 22210)
 aggr_sw    = Node.new("AGGR-SW" , (8..13)   , 4, 2048, 22211, -1, -1, "eth0")
 
-all_in_one = Node.new("ALL-ONE" , [1,3,4,8,10,12]	, 8, 8192, 22201, 22280, 26080)
-c1_node    = Node.new("USER"	, [2,9,11,13]		, 2, 2048, 22202)
+all_in_one = Node.new("ALL-ONE" , [1,3,4,8,10,12], 8, 8192, 22201, 22280, 26080)
+c1_node    = Node.new("USER"	, [2,    9,11,13], 2, 2048, 22202)
 
 # list of nodes and switches
 switches = [ mgmt_sw, aggr_sw ]
@@ -44,7 +44,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     end
  
     config.vm.define "#{hostname}" do |cfg_sw|
-      cfg_sw.vm.box = "ngkim/ubuntu-ovs"
+      cfg_sw.vm.box = "ubuntu/trusty64"
       cfg_sw.vm.boot_timeout = 90
 
       cfg_sw.ssh.username = "vagrant"
@@ -58,7 +58,8 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
       if bridged_interface != ""
         cfg_sw.vm.network "public_network", auto_config: false, bridge: "#{bridged_interface}"
       end
-  
+
+      cfg_sw.vm.provision :shell, :path => "../common/install_openvswitch_of13.sh"
       cfg_sw.vm.provision :shell, :path => "init_node_#{hostname}.sh"
       cfg_sw.vm.provider "virtualbox" do |v|
         # TODO:

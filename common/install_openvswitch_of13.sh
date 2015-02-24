@@ -44,8 +44,9 @@ apt-get install -y python-simplejson \
 	git pkg-config
 		
 echo "5. download openvswitch-2.3.1.tar.gz"
-wget http://openvswitch.org/releases/openvswitch-2.3.1.tar.gz
-tar xvzf openvswitch-2.3.1.tar.gz
+# suppress output
+wget http://openvswitch.org/releases/openvswitch-2.3.1.tar.gz &> /dev/null
+tar xvzf openvswitch-2.3.1.tar.gz &> /dev/null
 	
 echo "6. compile"
 cd openvswitch-2.3.1

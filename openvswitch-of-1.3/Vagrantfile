@@ -19,9 +19,9 @@ require "../include/vnode.rb"
 
 mgmt_sw = Node.new("MGMT-SW" , (1..7), 4, 2048, 22880)
 
-node_00 = Node.new("NODE_00" , [1] , 2, 2048, 22881)
-node_10 = Node.new("NODE_10" , [2] , 2, 2048, 22882)
-node_20 = Node.new("NODE_20" , [3] , 2, 2048, 22883)
+node_00 = Node.new("NODE_00" , [1]   , 2, 2048, 22881)
+node_10 = Node.new("NODE_10" , [2]   , 2, 2048, 22882)
+node_20 = Node.new("NODE_20" , [3]   , 2, 2048, 22883)
 
 # list of nodes and switches
 switches = [ mgmt_sw ]
@@ -65,7 +65,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
         cfg_sw.vm.network "public_network", auto_config: false, bridge: "#{bridged_interface}"
       end
   
-      cfg_sw.vm.provision :shell, :path => "install_openvswitch_of13.sh"
+      cfg_sw.vm.provision :shell, :path => "../common/install_openvswitch_of13.sh"
       cfg_sw.vm.provision :shell, :path => "init_node_#{hostname}.sh"
       cfg_sw.vm.provider "virtualbox" do |v|
         # TODO:
