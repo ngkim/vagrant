@@ -11,7 +11,7 @@
 require "../include/vnode.rb"
 
 mgmt_sw    = Node.new("MGMT-SW" , (1..7)    , 4, 2048, 22910)
-aggr_sw    = Node.new("AGGR-SW" , (8..13)   , 4, 2048, 22911, -1, -1, "eth0")
+aggr_sw    = Node.new("AGGR-SW" , (8..13)   , 4, 2048, 22911, -1, -1, "em1")
 
 all_in_one = Node.new("ALL-ONE" , [1,3,4,8,10,12], 8, 8192, 22901, 22980, 26980)
 c1_node    = Node.new("C1"	    , [2,    9,11,13], 2, 2048, 22902)
