@@ -23,9 +23,11 @@ sudo modprobe 8021q
 sudo ifconfig eth5 up
 echo "4. configure an interface for vlan 10 (eth5)"
 sudo vconfig add eth5 10
-	
+sudo ifconfig eth5.10 up
+		
 echo "5. configure an interface for vlan 11 (eth5)"
 sudo vconfig add eth5 11
+sudo ifconfig eth5.11 up
 
 echo "6. create a bridge containing green and orange interfaces"
 sudo brctl addbr br0
