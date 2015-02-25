@@ -46,6 +46,7 @@ apt-get install -y python-simplejson \
 echo "5. download openvswitch-2.3.1.tar.gz"
 wget http://openvswitch.org/releases/openvswitch-2.3.1.tar.gz &> /dev/null
 tar xvzf openvswitch-2.3.1.tar.gz
+rm openvswitch-2.3.1.tar.gz
 	
 echo "6. compile"
 cd openvswitch-2.3.1
@@ -82,9 +83,11 @@ sudo ovs-vswitchd --pidfile --detach
 sudo ovs-vsctl show	
 	
 echo "11. create command aliases"
-cat > ~/.bash_alias <<EOF
+cat > $HOME/.bash_alias <<EOF
 alias ovs-show="sudo ovs-ofctl -O Openflow13 show"
 alias ovs-dump-groups="sudo ovs-ofctl -O Openflow13 dump-groups"
 alias ovs-dump-flows="sudo ovs-ofctl -O Openflow13 dump-flows"
 alias watch-ovs-dump-flows="watch -d sudo ovs-ofctl -O Openflow13 dump-flows"
 EOF 
+
+source $HOME/.bash_alias

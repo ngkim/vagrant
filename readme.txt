@@ -7,6 +7,21 @@
 # TODO LIST 
 ---------------------------------------------------------------------------
 
+Pattern 04: 
+  1) NODES
+     - Cloud Node (1): OpenStack All-in-one 
+     - Host Node  (4): Customer 
+                       Server Farm
+                       Public (RED)
+                       Orchestrator
+       
+  2) SWITCHES
+     - MGMT SW: 8 interfaces (1 vlan)                
+     - ACCS SW: 8 interfaces (1 vlan)
+     - STOR SW: 8 interfaces (1 vlan)
+     - CORE SW: 8 interfaces (1 vlan)
+     - AGGR SW: 7 interfaces 
+                  
 - Pattern 03: 
     OpenStack All-in-one (vUTM)
     + Ubuntu VMs (Office, Server Farm) 
