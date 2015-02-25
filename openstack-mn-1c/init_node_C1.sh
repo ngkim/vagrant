@@ -27,7 +27,7 @@ sudo ifconfig eth3.10 192.168.10.2/24 up
 	
 echo "5. configure an interface for vlan 11 (eth3)"
 sudo vconfig add eth3 11
-sudo ifconfig eth3.11 192.168.11.1/24 up
+sudo ifconfig eth3.11 192.168.11.2/24 up
 
 echo "6. network interface up (eth4)"
 sudo ifconfig eth4 up	

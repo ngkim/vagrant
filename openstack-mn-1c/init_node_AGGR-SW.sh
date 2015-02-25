@@ -18,7 +18,7 @@ BR0_ITFS=(  "eth1"  "eth2"  "eth3"  "eth4"  "eth5"  "eth6"  "eth7")
 
 # BASE_GROUP_ID + Array index will be used for group id 
 BASE_GROUP_ID=16
-EXT_GROUPS[0]="push_vlan:0x8100,set_vlan_vid:10,output:6"
+EXT_GROUPS[0]="push_vlan:0x8100,set_vlan_vid:10,output:5"
 EXT_GROUPS[1]="strip_vlan,output:7"
 
 # - SVC (VLAN 3000~4000) - All-in-one과 C-Node-1만 통신하므로 VLAN 구분없이 연결
@@ -43,7 +43,7 @@ FLOW_RULES[6]="in_port=4,dl_vlan=10 group=3"
 #      . in_port:em6,vlan=10 -> strip_vlan,output: em7                                     # All-in-one ==> WAN (VLAN 태그 제거후 전달)
 #      . in_port:em7 -> push_vlan:0x8100,set_field:10-\>vlan_vid,output: em6   # WAN ==> All-in-one (VLAN 태그 추가후 전달)
 # 추가로 strip_vlan을 하는 group과 vlan_vid를 추가하는 group을 새로 지정
-FLOW_RULES[7]="in_port=6,dl_vlan=10 group=17"
+FLOW_RULES[7]="in_port=5,dl_vlan=10 group=17"
 FLOW_RULES[8]="in_port=7,dl_vlan=10 group=16"
 
 ###########################################################################
