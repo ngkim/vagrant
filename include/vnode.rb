@@ -1,13 +1,20 @@
 class Node
   def initialize(hostname, internal_interfaces, cpu, memory, ssh_nat_port, http_nat_port = -1, novnc_nat_port = -1, bridged_interface = "")
     @hostname=hostname
-    @interfaces=internal_interfaces
     @cpu=cpu
     @memory=memory
     @ssh_nat_port=ssh_nat_port
     @http_nat_port=http_nat_port
     @novnc_nat_port=novnc_nat_port
     @bridged_interface=bridged_interface
+    
+    # if internal_innterfaces are type of Range, change it to Array
+    if internal_interfaces.instance_of? Range
+      @interfaces=internal_interfaces.to_a
+    else
+      @interfaces=internal_interfaces
+    end
+    
   end
 
   def get_hostname
