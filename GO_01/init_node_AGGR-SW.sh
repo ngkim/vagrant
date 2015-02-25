@@ -16,16 +16,7 @@
 BR0="br-aggr"
 BR0_ITFS=(  "eth1"  "eth2"  "eth3"  "eth4"  "eth5"  "eth6"  "eth7")
 
-# BASE_GROUP_ID + Array index will be used for group id 
-BASE_GROUP_ID=16
-EXT_GROUPS[0]="push_vlan:0x8100,set_vlan_vid:10,output:5"
-EXT_GROUPS[1]="strip_vlan,output:7"
-
-# - SVC (VLAN 3000~4000) - All-in-one과 C-Node-1만 통신하므로 VLAN 구분없이 연결
-#    . in_port:em1 -> output:em2   #All-in-one => C-Node-1
-#    . in_port:em2 -> output:em1   #C-Node-1  => All-in-one
-FLOW_RULES[1]="in_port=1 group=2"
-FLOW_RULES[2]="in_port=2 group=1"
+# - SVC (VLAN 3000~4000) - All-in-one만 있으므로 연결 필요없음
 
 # - LAN (VLAN 10~2000) -  각 고객별로 고객이 지닌 모든 LAN용 VLAN에 대해 아래 룰을 반복 입력
 #    * 고객 Office 트래픽 (VLAN 11)
@@ -34,17 +25,23 @@ FLOW_RULES[2]="in_port=2 group=1"
 #    * Server Farm 트래픽 (VLAN 10)
 #        . in_port:em3,vlan=10 -> output: em4   # All-in-one ==> C-Node-1
 #	     . in_port:em4,vlan=10 -> output: em3   # C-Node-1 ==> All-in-one
-FLOW_RULES[3]="in_port=3,dl_vlan=11 group=4"
-FLOW_RULES[4]="in_port=4,dl_vlan=11 group=3"
-FLOW_RULES[5]="in_port=3,dl_vlan=10 group=4"
-FLOW_RULES[6]="in_port=4,dl_vlan=10 group=3"
+FLOW_RULES[1]="in_port=3,dl_vlan=11 group=2"
+FLOW_RULES[2]="in_port=4,dl_vlan=10 group=2"
+FLOW_RULES[3]="in_port=2,dl_vlan=11 group=3"
+FLOW_RULES[4]="in_port=2,dl_vlan=10 group=4"
 
 #- WAN (VLAN 10~2000) - 각 고객별로 고객이 지닌 모든 WAN용 VLAN에 대해 아래 룰을 반복 입력
 #      . in_port:em6,vlan=10 -> strip_vlan,output: em7                                     # All-in-one ==> WAN (VLAN 태그 제거후 전달)
 #      . in_port:em7 -> push_vlan:0x8100,set_field:10-\>vlan_vid,output: em6   # WAN ==> All-in-one (VLAN 태그 추가후 전달)
 # 추가로 strip_vlan을 하는 group과 vlan_vid를 추가하는 group을 새로 지정
-FLOW_RULES[7]="in_port=5,dl_vlan=10 group=17"
-FLOW_RULES[8]="in_port=7 group=16"
+FLOW_RULES[5]="in_port=5,dl_vlan=10 group=6"
+FLOW_RULES[6]="in_port=6,dl_vlan=10 group=5"
+
+# BASE_GROUP_ID + Array index will be used for group id 
+#BASE_GROUP_ID=16
+# 호스트의 em1을 이용해 외부와 연결할 때 필요하나 여기서는 구성하지 않음
+#EXT_GROUPS[0]="push_vlan:0x8100,set_vlan_vid:10,output:5"
+#EXT_GROUPS[1]="strip_vlan,output:7"
 
 ###########################################################################
 
