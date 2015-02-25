@@ -26,9 +26,9 @@ core_sw    = Node.new("CORE-SW" ,  [13,16] , 2, 2048, 23013)
 
 orch_node  = Node.new("ORCH"	, [1]            , 2, 2048, 23020)
 all_in_one = Node.new("ALL-ONE" , [2,3,4,8,9,12] , 8, 8192, 23021, 23080, 23680)
-customer   = Node.new("CUSTOM"	, [5]            , 2, 2048, 23022)
-server     = Node.new("SERVER"	, [6]            , 2, 2048, 23023)
-public     = Node.new("PUBLIC"	, [7]            , 2, 2048, 23024)
+customer   = Node.new("CUSTOM"	, [5,14]         , 2, 2048, 23022)
+server     = Node.new("SERVER"	, [6,15]         , 2, 2048, 23023)
+public     = Node.new("PUBLIC"	, [7,16]         , 2, 2048, 23024)
 
 # list of nodes and switches
 switches = [ mgmt_sw, aggr_sw, accs_sw, stor_sw, core_sw ]
