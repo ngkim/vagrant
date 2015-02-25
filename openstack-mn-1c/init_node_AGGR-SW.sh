@@ -145,6 +145,14 @@ add_flows() {
 	done		
 }
 
+# remove all flow entries from ovs
+clear_flows() {
+	BR_NAME=$1
+	
+	cmd="sudo ovs-ofctl -O Openflow13 del-flows $BR_NAME"
+	run_commands $cmd						
+}
+
 dump_groups() {
 	BR_NAME=$1
 	
@@ -161,7 +169,8 @@ dump_flows() {
 
 init_ovs    $BR0 BR0_ITFS[@]
 add_groups  $BR0 BR0_ITFS[@]
-ext_groups  $BR0 EXT_GROUPS[@] $BASE_GROUP_ID 
+ext_groups  $BR0 EXT_GROUPS[@] $BASE_GROUP_ID
+clear_flows $BR0 
 add_flows   $BR0 FLOW_RULES[@]
 dump_groups $BR0
 dump_flows  $BR0
