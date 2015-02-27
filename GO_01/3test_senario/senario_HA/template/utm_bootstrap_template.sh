@@ -1,0 +1,92 @@
+#!/bin/bash
+
+file_name=$1
+_ip=$2
+_netmask=$3
+
+cat > $file_name <<EOF
+#!/bin/bash
+
+echo "
+################################################################################
+#
+#   UTM VM :: User Data Action
+#
+################################################################################
+"
+
+echo "
+# ---------------------------------------------------
+# 1. install bridge-utils to use brctl commands
+# ---------------------------------------------------
+"
+
+apt-get -y update
+apt-get -y install bridge-utils    
+apt-get -y install iperf
+
+
+echo "
+# --------------------------------------------------- 
+# 2. ip_forward activate
+# ---------------------------------------------------
+"        
+
+echo "
+net.ipv4.ip_forward=1
+net.ipv4.conf.all.rp_filter=0
+net.ipv4.conf.default.rp_filter=0" | tee -a /etc/sysctl.conf
+
+sysctl -p    
+
+echo "
+# --------------------------------------------------- 
+# 3. green/orange nic activate
+# ---------------------------------------------------
+"
+echo "# green nic" 
+cli="ifconfig eth1 up"
+echo \$cli
+eval \$cli
+
+echo "# orange nic" 
+cli="ifconfig eth2 up"
+echo \$cli
+eval \$cli
+    
+echo "
+# --------------------------------------------------- 
+# 4. green/orange interface connect to bridge
+# ---------------------------------------------------
+"
+cli="brctl addbr br0"
+echo \$cli
+eval \$cli
+
+cli="brctl addif br0 eth1"
+echo \$cli
+eval \$cli
+
+cli="brctl addif br0 eth2"
+echo \$cli
+eval \$cli
+    
+echo "
+# --------------------------------------------------- 
+# 5. attach green interface ip to br0
+# ---------------------------------------------------
+"                            
+# ifconfig br0 192.168.0.1/24
+cli="ifconfig br0 $_ip netmask $_netmask up"
+echo \$cli
+eval \$cli
+    
+echo "
+################################################################################
+#
+#   End User Data Action
+#
+################################################################################
+"
+
+EOF

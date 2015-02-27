@@ -1,0 +1,568 @@
+#!/bin/bash
+
+# ------------------------------------------------------------------------------
+#LJG: 내가 쉘프로그래밍 초보자라 많은 시행착오가 있슴.
+#    0. utf-8 사용에 따라 한글 깨짐 -> 에디터에서 utf-8로 변환하여 저장할 것
+#    1. 라인끝에 공백이 들어가 있으면 에러가 발생 -> 도구로 문장끝 공백삭제 추천
+#    2. ',과 " or { ) 짝 맞추기 -> bash 문법 systax 지원하는 에디터 사용 추천
+#        ex) '~~", "~~', { ) 이런 에러 많이 생김 ㅋㅋ
+#    3. 함수안에서 ()사용하면 안됨 -> []를 사용해야 함. 아마 함수로 착각하는 듯
+#    4. awk, grep 에서 정확하게 하나만 찾아지게 하려면 "$var "처럼 끝에 빈칸을 하나 넣어준다.
+#       ex) awk "/${GUEST_IMAGE} / {print $2}" or grep "$GUEST_IMAGE "
+#    5. echo에서 '를 사용하면 변수에 값이 치환되지 않슴. "를 사용해야 함.
+# ------------------------------------------------------------------------------
+
+# LJG:  잘못된 VM 을 DB에서 삭제하는 법
+#       연결고리(FK)를 찾아서 하부테이블에서 부터 삭제해 나가야 함
+# 1. instance_actions_events -> action_id     <-> instance_actions.id
+# 2. instance_actions        -> instance_uuid <-> instances.id
+# 3. instance_info_caches    -> instance_uuid <-> instances.id
+# 4. instance_system_metadata-> instance_uuid <-> instances.id
+# 5. instance
+
+
+# LJG: cnode 주요 디렉토리: 아래 디렉토리들의 역할이 무엇인지 분석하자!!!
+#   /var/lib/nova/instances
+#   /etc/libvirt/qemu
+#   /var/run/libvirt/qemu
+
+################################################################################
+
+
+# LJG : To do list
+#   tenant, user, passwd 를 받아서 특정 tenant 단위로 검색하고 결과를 제공하도록 한다.
+#   만약 그렇지 않으면 다양한 tenant가 사용할 때 동일한 vm이름이 검색될 수 있다.
+
+# ------------------------------------------------------------------------------
+# interactive install을 위한 function !!!
+# ------------------------------------------------------------------------------
+function ask_continue_stop() {
+    
+    MY_PROMPT="continue(c), stop(s) ??"
+    while :
+    do
+        echo -n "$MY_PROMPT"
+        read line
+
+        if [ -z "$line" ]; then
+            echo "continue: <$line>"
+            return  
+        fi      
+
+        if [ "$line" = "c" ]; then
+            echo "continue: $line"
+            break
+        elif [ "$line" = "\n" ]; then
+            echo "newline found <$line>"
+            exit
+        elif [ "$line" = "s" ]; then
+            echo "stop: $line"
+            exit
+        else
+            echo "wrong input: <$line>"
+            exit
+        fi
+    done
+} 
+
+function ask_yes_no() {    
+    local  _result_ptr=$1
+    local  local_result
+
+    msg=$2    
+    MY_PROMPT="${msg} yes(y), no(n) ??"
+        
+    while :
+    do
+        echo -n "$MY_PROMPT"
+        read line
+
+        if [ -z "$line" ]; then
+            echo "no: <$line>"
+            answer="n"
+            break
+        fi      
+
+        if [ "$line" = "y" ]; then
+            echo "yes: <$line>"
+            answer="y"
+            break
+        elif [ "$line" = "n" ]; then
+            echo "no: <$line>"
+            answer="n"
+            break
+        else
+            echo "wrong input: <$line>"
+            exit
+        fi
+    done
+    
+    eval $_result_ptr=$answer
+} 
+
+function ask_proceed_skip() {
+    local _result_ptr=$1
+    
+    answer="p"
+    MY_PROMPT="함수실행 진행(p), 건너뛰기(s or Enter)"
+    while :
+    do
+        echo -n "$MY_PROMPT"
+        read line        
+        
+        if [ -z "$line" ]; then
+            answer="s"
+            echo "-> skip funcition"            
+            break
+	    fi
+        
+        if [ "$line" = "p" ]; then
+            answer="p"
+            echo "-> proceed funcition"
+            break
+        elif [ "$line" = "s" ]; then
+            answer="s"
+            echo "-> skip funcition"
+            break
+        else
+            echo "-> wrong input: <$line>"
+            exit
+        fi  
+    done
+
+    eval $_result_ptr=$answer
+} 
+
+# ------------------------------------------------------------------------------
+# 보통은 admin 권한으로 실행하나 특정 tenant/user 계정으로 명령을 실행한다.
+# 일반계정으로 명령을 수행하는 방법은 아래처럼 두가지가 있는데 
+# 첫번째 방법이 소스가 훨씬 깔끔하다.
+#
+# 1. 환경변수로 설정해놓고 실행하는 방법
+#   export OS_TENANT_NAME=admin
+#   export OS_USERNAME=admin
+#   export OS_PASSWORD=ohhberry3333
+#   export OS_AUTH_URL=http://10.0.0.101:5000/v2.0/
+#   export OS_NO_CACHE=1
+#
+#   ex) nova secgroup-add-rule default tcp 22 22 0.0.0.0/0
+#
+# 2. CLI 명령에 계정정보를 일일이 입력하는 방법
+#   ex) nova --os-tenant-name $GUEST_TENANT_NAME --os-username $GUEST_USER_NAME --os-password $GUEST_USER_PASS
+#        secgroup-add-rule default tcp 22 22 0.0.0.0/0
+# ------------------------------------------------------------------------------
+
+function run_cli_as_user() {
+
+    # customer 계정으로 명령을 수행하기 위해 환경변수 설정    
+
+    if [[ -z "$GUEST_TENANT_NAME" || -z "$GUEST_USER_NAME" || -z "$GUEST_USER_PASS" ]]; then
+        echo "Error: GUEST_TENANT_NAME/GUEST_USER_NAME/GUEST_USER_PASS 변수중 하나가 미 선언됨!!!"
+        exit        
+    fi
+    
+    set_openstack_cli_env $GUEST_TENANT_NAME $GUEST_USER_NAME $GUEST_USER_PASS    
+    
+    cli=$*
+    echo $cli;
+    eval $cli
+
+    #cli="$*"    
+    #cli=$&    
+    #cli="$&"
+
+    
+    # 원래 admin 계정으로 환경변수 설정
+    set_openstack_cli_env $ADMIN_TENANT_NAME $ADMIN_USER_NAME $ADMIN_USER_PASS
+}
+
+function run_cli_as_admin() {
+
+    # admin 계정으로 환경변수 설정
+
+    if [[ -z "$ADMIN_TENANT_NAME" || -z "$ADMIN_USER_NAME" || -z "$ADMIN_USER_PASS" ]]; then
+        echo "Error: ADMIN_TENANT_NAME/ADMIN_USER_NAME/ADMIN_USER_PASS 변수중 하나가 미 선언됨!!!"
+        exit        
+    fi    
+    
+    set_openstack_cli_env $ADMIN_TENANT_NAME $ADMIN_USER_NAME $ADMIN_USER_PASS
+    
+    cli=$*
+
+    # 실행할 명령어를 출력한다.
+    echo $cli        
+    eval $cli
+    
+}
+
+function set_openstack_cli_env() {
+    tenant=$1
+    user=$2
+    pass=$3
+    
+    if [[ -z "$tenant" || -z "$user" || -z "$pass" ]]; then
+        echo "Error: tenant/user/pass 변수중 하나가 미 선언됨!!!"
+        exit
+    fi
+    
+    export OS_TENANT_NAME=$tenant
+    export OS_USERNAME=$user
+    export OS_PASSWORD=$pass
+    
+}
+
+function set_openstack_cli_admin_env() {
+    
+    if [[ -z "$ADMIN_TENANT_NAME" || -z "$ADMIN_USER_NAME" || -z "$ADMIN_USER_PASS" ]]; then
+        echo "Error: ADMIN_TENANT_NAME/ADMIN_USER_NAME/ADMIN_USER_PASS 변수중 하나가 미 선언됨!!!"
+        exit        
+    fi 
+    
+    export OS_TENANT_NAME=$ADMIN_TENANT_NAME
+    export OS_USERNAME=$ADMIN_USER_NAME
+    export OS_PASSWORD=$ADMIN_USER_PASS
+    
+}
+
+function set_openstack_cli_user_env() {
+    
+    if [[ -z "$GUEST_TENANT_NAME" || -z "$GUEST_USER_NAME" || -z "$GUEST_USER_PASS" ]]; then
+        echo "Error: GUEST_TENANT_NAME/GUEST_USER_NAME/GUEST_USER_PASS 변수중 하나가 미 선언됨!!!"
+        exit        
+    fi
+    
+    export OS_TENANT_NAME=$GUEST_TENANT_NAME
+    export OS_USERNAME=$GUEST_USER_NAME
+    export OS_PASSWORD=$GUEST_USER_PASS
+        
+}
+
+function get_vm_port_id_old()
+{
+    tenant_name='admin'
+    vm=$1
+    network=$2
+    subnet=$3
+    ip_addr=$4
+
+    get_tenant_id $tenant_name  # tenant_id 구함
+    tenant_id=$ret_tenant_id # get_tenant_id함수 호출 결과를 저장
+
+    echo "tenant_name   : $tenant_name"
+    echo "vm            : $vm"
+    echo "network       : $network"
+    echo "subnet        : $subnet"
+    echo "ip_addr       : $ip_addr"
+
+    query="
+        select
+        	np.id as port_id
+        from
+        	nova.instances as ni,
+        	neutron.ports as np,
+        	neutron.ipallocations as nia,
+        	neutron.networks as nn,
+        	neutron.subnets as ns
+
+        where
+        	ni.deleted_at IS NULL
+        	AND ni.uuid = np.device_id
+        	AND np.id = nia.port_id
+        	AND ni.display_name = '$vm'
+        	AND nn.name = '$network'
+        	AND ns.name = '$subnet'
+        	AND nia.ip_address LIKE '$ip_addr'
+        	AND nn.id = nia.network_id
+        	AND ns.id = nia.subnet_id"
+
+    port_id=$(echo $query | mysql -N -uroot -pohhberry3333)
+    echo "port_id : $port_id"
+    echo "QUERY<<$query>>"
+    ret_port_id=$port_id
+}
+
+
+function get_tenant_id_old() {
+
+    # usage: get_tenant_id service
+    #        echo "result -> <$ret_tenant_id>"
+
+    tenant_name=$1
+    tenant_id=$(keystone tenant-list | grep "$tenant_name " | awk '{print $2}')
+    printf "tenant_name[%s] -> tenant_id[%s]\n" $tenant_name $tenant_id
+
+    # LJG: 사실은 필요없으나 변수의 가독성을 향상시키기 위해 사용했슴.
+    ret_tenant_id=$tenant_id
+    # echo $tenant_id
+}
+
+
+function get_random_num_between() {
+    local  _result_ptr=$1
+    local  local_result
+    
+    min=$2
+    max=$3
+    
+    # 상한값과 하한값 사이의 수가 필요하다면 위의 두 테크닉을 같이 쓰면 됩니다.
+    number=0   # 초기화
+    while [ "$number" -le $min ]
+    do
+      number=$RANDOM
+      let "number %= $max"  # $number 가 $max 안에 들어오게.
+    done
+    # echo "$min 와 $max 사이의 랜덤한 숫자  ---  $number"
+    # echo
+    
+    eval $_result_ptr=$number
+
+}
+
+
+function get_tenant_id() {
+
+    # use call by ref 방법: 소스가 훨씬 깔끔해짐.
+
+    # usage: get_tenant_id _tenant_id tenant_name
+    #        echo "result -> <$_tenant_id>"
+
+    local  _result_ptr=$1
+    local  local_result
+
+    tenant_name=$2
+    tenant_id=$(keystone tenant-list | grep "$tenant_name " | awk '{print $2}')
+    printf "tenant_name[%s] -> tenant_id[%s]\n" $tenant_name $tenant_id
+    local_result=$tenant_id
+
+    #original ->  eval $_result_ptr="'$local_result'"
+    eval $_result_ptr=$local_result
+}
+
+function get_vm_id_new() {
+
+    # usage: get_vm_id _vm_id vm_name
+    #        echo "result -> <$_vm_id>"
+    
+    local _result_ptr=$1
+
+    vm_name=$2
+    
+    # option but 중복된 이름이 나올 확률이 높아지므로 사용권고
+    tenant=$3
+    user=$4
+    pass=$5    
+
+    if [ $tenant ]; then
+        vm_id=$(nova --os-tenant-name $tenant --os-username $user --os-password $pass list | grep "$vm_name " | awk '{print $2}')
+        printf "tenant[%s] vm_name[%s] -> vm_id[%s]\n" $tenant $vm_name $vm_id     
+    else
+        echo "nova list"
+        vm_id=$(nova list | grep "$vm_name " | awk '{print $2}')
+        printf "vm_name[%s] -> vm_id[%s]\n" $vm_name $vm_id        
+    fi
+
+    eval $_result_ptr=$vm_id
+}
+
+function get_vm_id() {
+
+    # usage: get_vm_id _vm_id vm_name
+    #        echo "result -> <$_vm_id>"
+    
+    local _result_ptr=$1
+
+    vm_name=$2
+    vm_id=$(nova list | grep "$vm_name " | awk '{print $2}')
+    printf "vm_name[%s] -> vm_id[%s]\n" $vm_name $vm_id        
+    
+
+    eval $_result_ptr=$vm_id
+}
+
+# GUEST_NET_ID=$(neutron net-list | grep "$GUEST_NET " | awk '{print $2}')
+function get_net_id() {
+
+    # usage: get_net_id _net_id net_name
+    #        echo "result -> <$_net_id>"
+
+    local _result_ptr=$1
+
+    net_name=$2
+    net_id=$(neutron net-list | grep "$net_name " | awk '{print $2}')
+    printf "net_name[%s] -> net_id[%s]\n" $net_name $net_id
+
+    eval $_result_ptr=$net_id
+}
+
+# GUEST_SUBNET_ID=$(neutron subnet-list --tenant $GUEST_TENANT_NAME | grep "$GUEST_SUBNET " | awk '{print $2}')
+function get_subnet_id() {
+
+    # usage: get_subnet_id _subnet_id tenant_name subnet_name
+    #        echo "result -> <$_subnet_id>"
+
+    local _result_ptr=$1
+
+    tenant_name=$2
+    subnet_name=$3
+    
+    subnet_id=$(neutron subnet-list --tenant $tenant_name | grep "$subnet_name " | awk '{print $2}')
+    printf "tenant_name[%s], subnet_name[%s] -> subnet_id[%s]\n" $tenant_name $subnet_name $subnet_id
+
+    eval $_result_ptr=$subnet_id
+}
+
+# GUEST_ROUTER_ID=$(neutron router-list --tenant $GUEST_TENANT_NAME | grep "$GUEST_ROUTER " | awk '{print $2}')
+function get_router_id() {
+
+    # usage: get_router_id _router_id tenant_name router_name
+    #        echo "result -> <$_router_id>"
+
+    local _result_ptr=$1
+
+    tenant_name=$2
+    router_name=$3
+    
+    router_id=$(neutron router-list --tenant $tenant_name | grep "$router_name " | awk '{print $2}')
+    printf "tenant_name[%s], router_name[%s] -> router_id[%s]\n" $tenant_name $router_name $router_id
+
+    eval $_result_ptr=$router_id
+}
+
+# GUEST_IMAGE_ID=$(nova image-list | grep "$GUEST_IMAGE " | awk '{print $2}')
+function get_image_id() {
+
+    # usage: get_image_id _image_id image_name
+    #        echo "result -> <$_image_id>"
+
+    local _result_ptr=$1
+
+    image_name=$2
+    image_id=$(nova image-list | grep "$image_name " | awk '{print $2}')
+    printf "image_name[%s] -> image_id[%s]\n" $image_name $image_id
+
+    eval $_result_ptr=$image_id
+}
+
+# GUEST_USER_ID=$(keystone user-list --tenant $GUEST_TENANT_NAME | grep "$GUEST_USER_NAME " | awk '{print $2}')
+function get_user_id() {
+
+    # usage: get_user_id _user_id tenant_name user_name
+    #        echo "result -> <$_user_id>"
+
+    local _result_ptr=$1
+
+    tenant_name=$2
+    user_name=$3
+    
+    user_id=$(keystone user-list --tenant $tenant_name | grep "$user_name " | awk '{print $2}')
+    printf "tenant_name[%s], user_name[%s] -> user_id[%s]\n" $tenant_name $user_name $user_id
+
+    eval $_result_ptr=$user_id
+}
+
+# GUEST_ROLE_ID=$(keystone user-role-list --tenant $GUEST_TENANT_NAME | grep "$GUEST_ROLE_NAME " | awk '{print $2}')
+function get_user_role_id() {
+
+    # usage: get_user_role_id _user_role_id tenant_name user-role_name
+    #        echo "result -> <$_user_role_id>"
+
+    local _result_ptr=$1
+
+    tenant_name=$2
+    user_role_name=$3
+    
+    user_role_id=$(keystone user-role-list --tenant $tenant_name | grep "$user_role_name " | awk '{print $2}')
+    printf "tenant_name[%s], user_role_name[%s] -> user_role_id[%s]\n" $tenant_name $user_role_name $user_role_id
+
+    eval $_result_ptr=$user_role_id
+}
+
+
+# 
+function get_vm_port_id()
+{
+    # usage: get_vm_port_id _result $vm $network $subnet
+    #   get_vm_port_id _result hybrid_vm1_ubuntu-12.04 orange_vlan1_net orange_vlan1_subnet
+    #   get_vm_port_id _result hybrid_vm2_ubuntu-12.04 orange_vlan2_net orange_vlan2_subnet
+    #   get_vm_port_id _result ubuntu-12.04-test1 private_network private_subnetwork
+
+    local _result_ptr=$1
+
+    vm=$2
+    network=$3
+    subnet=$4
+
+    query="
+        select
+        	np.id as port_id
+        from
+        	nova.instances as ni,
+        	neutron.ports as np,
+        	neutron.ipallocations as nia,
+        	neutron.networks as nn,
+        	neutron.subnets AS ns
+
+        where
+        	ni.deleted_at IS NULL
+        	AND ni.hostname = '$vm'
+        	AND ni.uuid = np.device_id
+        	AND np.id = nia.port_id
+        	AND nn.name = '$network'
+        	AND ns.name = '$subnet'
+        	AND ns.id = nia.subnet_id"
+
+    port_id=$(echo $query | mysql -N -uroot -pohhberry3333)
+    echo "QUERY<<$query>>"
+    echo "vm<$vm> -> port_id<$port_id>"
+    eval $_result_ptr=$port_id
+}
+
+function get_vm_dhcp()
+{
+    # usage: get_vm_dhcp $vm
+
+    local _result_ptr=$1
+
+    vm=$2
+
+    query="        
+		SELECT
+		    ni.hostname AS vm_name,
+		    np.id AS port_id,
+		    nn.name AS network_name,
+		    ns.name AS subnet_name
+		FROM
+		    nova.instances AS ni,
+		    neutron.ports AS np,
+		    neutron.ipallocations AS nia,
+		    neutron.networks AS nn,
+		    neutron.subnets AS ns
+		WHERE
+		    ni.deleted_at IS NULL
+		    AND ni.hostname = '$vm'
+		    AND ni.uuid = np.device_id
+		    AND np.id = nia.port_id
+		    AND nia.network_id = nn.id
+		    AND nia.subnet_id=ns.id"
+
+    port_id=$(echo $query | mysql -N -uroot -pohhberry3333)
+    echo "QUERY<<$query>>"
+    echo "vm<$vm> -> port_id<$port_id>"
+    eval $_result_ptr=$port_id
+}
+
+test() {
+
+    get_tenant_id _tenant_id admin
+    get_vm_id _vm_id hybrid_vm1_ubuntu-12.04
+    get_net_id _net_id orange_vlan1_net
+    get_subnet_id _subnet_id admin orange_vlan1_subnet 
+    get_router_id _router_id admin my_router
+    get_image_id _image_id ubuntu-12.04
+    get_user_id _user_id admin admin
+    get_user_role_id _user_role_id admin admin
+
+    get_vm_port_id _port_id hybrid_vm1_ubuntu-12.04 orange_vlan1_net orange_vlan1_subnet    
+}
+
+# test

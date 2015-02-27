@@ -1,0 +1,90 @@
+################################################################################
+    
+    OpenStack으로 클라우드 설치를 완료한 뒤에 
+    공통적으로 사용되는 인프라를 생성한다.
+        
+################################################################################
+    LJG todo list
+    - rsyslog를 이용한 모든 host 로그를 수집 및 logrotate 적용 스크립트    
+    - nova, neutron policy.json 수정 스크립트
+    - keystone token 주기적인 정리 스크립트
+    - mysql 데이터베이스 주기적인 백업
+    
+    
+    * 환경구축        
+        1. 1make_admin_security_and_keypair.sh    
+            - host-aggr기능을 이용하여 available-zone을 생성한다.
+            	- HOST_AGGR_NAME	ex) zo-aggr
+				- AVAILABILITY_ZONE	ex)seocho-az
+				- HOST 				ex) controller, cnode01, cnode02
+            - admin default security group에 rule을 추가한다.
+            	- security gropu(default)       ex)icmp, tcp(22,80,443,5001)
+            - keypair을 생성한다.                
+                - admin keypair/keypair.pub     ex)adminkey/admin.pub
+        
+        2. 2change_admin_quota.sh    
+            - admin Quota를 적절하게 조정한다.(기본적으로 10배씩 증가시킴)
+                - nova      ex) instances 100/cores 200/ram 512000/floating-ips 100/metadata_items 1280/injected_files 50
+                - neutron   ex) floatingip 500/network 100/port 5000/router 100/security_group 100/security_group_rule 1000 
+                - cinder    ex) gigabytes 10000/snapshots 100/volumes 100
+        
+        3. 3make_base_public_network.sh    
+            - public provider network을 flat mode로 제공한다.
+                - public_network        ex) public_net                	
+                - public_subnetwork     ex) public_subnet
+                	cidr: 221.145.180.64/26	
+                	gw:   221.145.180.65
+                	ip-pool:221.145.180.71~85(east)
+                	ip-pool:221.145.180.86~95(west)
+        
+        4. 4make_global_mgmt_network.sh
+            - UTM 테스트를 위해 접근하기 용이한 global mgmt network 환경을 제공한다
+            	- 테스트를 위해 대상이 되는 모든 VM은 global_mgmt_network에 연결한다.
+            	- admin계정으로 test_controller VM을 만들고 
+            	  이를 기반으로 다양한 test_vm에 접속하여test 명령을 수행한다.            	  
+        
+        5. 5make_base_hybrid_red_network.sh
+        	- vlan mode로 hybrid network에서 외부로 접속하기 위한 public network를 만든다.
+	        	RED_PUBLIC_NET=red_shared_public_net
+				RED_PUBLIC_SUBNET=red_shared_public_subnet
+				RED_PUBLIC_SUBNET_CIDR=221.145.180.64/26
+				RED_PUBLIC_SUBNET_GW=221.145.180.65
+				RED_PUBLIC_IP_POOL_START=221.145.180.96
+				RED_PUBLIC_IP_POOL_END=221.145.180.99
+				RED_PUBLIC_PHYSNET_NAME=physnet_hybrid
+				RED_PUBLIC_VLAN=2000
+				
+        6. 6make_base_images.sh
+            - 아래 디렉토리에 존재하는 이미지들을 읽어서 openstack image들을 만든다.
+        
+            root@controller:~/openstack/test_senario/senario2# ll ~/images
+            -rw-r--r--  1 root root 1.6G Sep 12 20:04 endian_original.img
+            -rw-r--r--  1 root root 567M Sep 12 20:06 ubuntu-12.04.img
+            -rw-r--r--  1 root root 632M Sep 12 20:07 vEFW_Community.img
+                
+        7. 7make_db_util_views.sh
+            - 오픈스택을 분석하는 데이터베이스 뷰들을 생성한다.
+                vw_vm_trace, vw_vm_inventory
+        
+        8. 8make_global_mgmt_vm.sh
+            - admin 계정으로 global_mgmt_network에 연결된 모든 vm에 접속할 수 있는 
+              vm을 만들고 외부접속을 위해 floating ip를 할당한다.
+               
+                - global_mgmt_net에 vm(global_mgmt_vm)을 생성한다.
+                - global_mgmt_vm에 floating_ip를 할당한다.
+                  
+                
+        (*) 일반 member role 사용자가 fixed_ip를 생성하고 host를 지정할 수 있게 policy 수정
+        
+            1. fixed_ip 생성 허용
+                /etc/neutron/policy.json 수정
+            
+                원본  :"create_port:fixed_ips": "rule:admin_or_network_owner",
+                수정본:"create_port:fixed_ips": "rule:admin_or_network_owner or role:member",
+                
+            2. host 지정 허용
+                /etc/nova/policy.json 수정
+            
+                default "compute:create:forced_host": "is_admin:True",
+                수정본  "compute:create:forced_host": "is_admin:True or role:member",
+                 	

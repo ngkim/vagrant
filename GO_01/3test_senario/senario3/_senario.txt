@@ -1,0 +1,192 @@
+################################################################################
+    
+    NFV HA를 테스트하기 위해서 필요한 환경을 생성하는 시나리오
+        
+################################################################################
+
+    * 전제조건
+    - red, orange, green network을 tenant network로 제공할 수 있도록 VLAN으로
+      TOR (ex: Aristar) 스위치와 openstack neutron network가 구성되어 있어야 한다.
+    - utm이 red/orange/green을 어떻게 스위칭하지???
+    
+    * 시나리오
+    
+        1. 고객 계정 및 권한 생성
+        
+        2. 고객계정으로 red, orange, green 네트워크를 2개씩(master/slave) 생성
+            ex) 정책을 정해야 하나 기본적으로 하나의 고객에 6개의 vlan 필요
+                master는 홀수, slave는 짝수를 부여                
+                - red_master    : ex) vlan 11
+                - red_slave     : ex) vlan 12
+                - orange_master : ex) vlan 13
+                - orange_slave  : ex) vlan 14
+                - green_master  : ex) vlan 15
+                - green_slave   : ex) vlan 16    
+            
+        3. UTM VM을 2개(master/slave) 생성 
+            - 각 VM은 global_mgmt_net, green_master, orange_master, red_master 4개의 nic 을 갖는다.
+                ex) global_mgmt_net(10.10.10.11)
+                    green_master(192.168.0.11)  -> vlan 15 
+                    orange_master(192.168.0.111)-> vlan 13
+                    red_master(172.0.0.11)      -> vlan 11
+                    
+            - master는 cnode01에 slave는 cnode02에 VM을 생성한다. 
+                ex) global_mgmt_net(10.10.10.12)
+                    green_slave(192.168.0.11)   -> vlan 16
+                    orange_slave(192.168.0.111) -> vlan 14
+                    red_slave(172.0.0.11)       -> vlan 12
+                    
+        4. 고객 클라이언트(green) VM을 하나 생성
+            - VM은 global_mgmt_net, green_master 2개의 nic 을 갖는다.
+                global_mgmt_net(10.10.10.13)
+                green_master(192.168.0.21)  -> vlan 15
+            - cnode03 서버에 생성한다.
+            - master UTM VM을 gateway로 설정한다.
+            - master UTM VM을 통해 고객 서버 VM(orange vm)에 통신한다. (iperf client 이용)
+            - master UTM VM을 통해 외부 서버 VM(red vm)에 통신한다. (iperf client 이용)
+            
+        5. 고객 서버(orange) VM을 하나 생성
+            - VM은 global_mgmt_net, orange_master 2개의 nic 을 갖는다.
+                global_mgmt_net(10.10.10.14)
+                orange_master(192.168.0.121) -> vlan 13
+            - cnode03 서버에 생성한다.
+            - master UTM VM을 gateway로 설정한다.
+            - master UTM VM을 통해 클라이언트 VM(green vm)과 통신한다. (iperf server 이용)
+            - master UTM VM을 통해 외부 서버 VM(red vm)에 통신한다. (iperf client 이용)
+    
+        6. 외부 서버(red) VM을 하나 생성
+            - 각 VM은 global_mgmt_net, red_master 2개의 nic 을 갖는다.
+                global_mgmt_net(10.10.10.15)
+                red_master(172.0.0.121) -> vlan 11                
+            - cnode03 서버에 생성한다.
+            - master UTM VM을 gateway로 설정한다.
+            - master UTM VM을 통해 클라이언트 VM(green vm)과 통신한다. (iperf server 이용)
+            - master UTM VM을 통해 고객서버 VM(orange vm)과 통신한다. (iperf server 이용)
+        
+        여기서부터는 일단 수작업으로 진행
+        
+        7. cnode01(master)에 장애발생시킴
+            - server restart, nic down, 등의 시나리오
+            
+        8. aristar 스위치에서 failover 실행
+            - web api를 통해 실행
+        
+        9. cnode02(slave)를 통해 red, orange, green vm들의 통신이 seamless 하게 이루어지는지 확인
+            - green  <-> oragne 통신 확인
+            - green  <-> red 통신 확인
+            - orange <-> red 통신 확인
+        
+        10. cnode01(master)에 장애복구시킴
+        
+        11. aristar 스위치에서 failback 실행
+            - web api를 통해 실행    
+        
+        12. cnode01(master)를 통해 red, orange, green vm들의 통신이 seamless 하게 이루어지는지 확인
+            - green  <-> oragne 통신 확인
+            - green  <-> red 통신 확인
+            - orange <-> red 통신 확인
+
+
+    * 환경구축(이 스크립트는 controller에서 수행되어야 함)
+        common_env에 설정된 고객정보를 참조하여 아래 명령 실행
+        1. 1make_account_and_security.sh    
+            - 고객과 관련된 계정을 생성하고 권한을 부여한다.
+                - 계정(tenant/user/password)    ex) forbiz/forbiz/forbiz1234
+                - 권한(member)                  ex) member
+                - keypair/keypair.pub           ex)forbizkey/forbizkey.pub
+                - security group(default)       ex)icmp, tcp(22,80,443,5001)
+        
+        2. 2change_quota.sh    
+            - 고객과 관련된 Quota를 적절하게 조정한다.(기본적으로 10배씩 증가시킴)
+                - nova      ex) instances 100/cores 200/ram 512000/floating-ips 100/metadata_items 1280/injected_files 50
+                - neutron   ex) floatingip 500/network 100/port 5000/router 100/security_group 100/security_group_rule 1000 
+                - cinder    ex) gigabytes 10000/snapshots 100/volumes 100
+        
+        3. 3make_default_network.sh    
+            - 일반적으로 클라우드에서 제공하는 network 환경을 제공한다.
+                - guest_network         ex) forbiz_guest_net
+                - guest_subnetwork      ex) forbiz_guest_subnet
+                - guest_router          ex) forbiz_guest_router
+                - guest_router에 guest_subnetwork interface 연결
+                - guest_router에 public gateway 설정
+        
+        4. 4make_hybrid_network.sh    
+            - UTM HA 테스트를 위한 hybrid network 환경을 제공한다.
+              
+              주의: orange network도 green과 동일 ip 대역을 할당한다.
+
+            (*) master network 생성
+                              
+                - master_red_network           ex) forbiz_master_red_net
+                - master_red_subnetwork        ex) forbiz_master_red_subnet
+              
+                - master_green_network         ex) forbiz_master_green_net
+                - master_green_subnetwork      ex) forbiz_master_green_subnet
+                
+                - master_orange_network        ex) forbiz_master_orange_net
+                - master_orange_subnetwork     ex) forbiz_master_orange_subnet
+        
+            (*) slave network 생성
+                - slave_red_network           ex) forbiz_slave_red_net
+                - slave_red_subnetwork        ex) forbiz_slave_red_subnet
+              
+                - slave_green_network         ex) forbiz_slave_green_net
+                - slave_green_subnetwork      ex) forbiz_slave_green_subnet
+                
+                - slave_orange_network        ex) forbiz_slave_orange_net
+                - slave_orange_subnetwork     ex) forbiz_slave_orange_subnet
+        
+        
+        5. 5make_vm_for_ha_test.sh            
+                
+            - UTM 테스트를 위한 vm들을 만든다
+            
+                - master UTM VM 생성
+                    - global_mgmt, master_green, master_orange, master_red 4개의 nic 을 갖는다.
+                    - cnode01 서버에 생성한다.        
+                    - UTM Firewall 시뮬레이트(red/orange/green을 어떻게 routing 하지??)
+                        - bridge를 이용하여 eth1(green)과 eth2(orange)를 연결한다
+                    - fixed_ip를 제공하여 VM 생성
+                    - 동적으로 생성된 userdata file 사용
+        
+                - slave UTM VM 생성
+                    - global_mgmt, slave_green, slave_orange, slave_red 4개의 nic 을 갖는다.
+                    - cnode02 서버에 생성한다.        
+                    - UTM Firewall 시뮬레이트(red/orange/green을 어떻게 routing 하지??)
+                        - bridge를 이용하여 eth1(green)과 eth2(orange)를 연결한다
+                    - fixed_ip를 제공하여 VM 생성
+                    - 동적으로 생성된 userdata file 사용
+                    
+                - Green 고객 클라이언트 VM 생성
+                    - global_mgmt, master_green 2개의 nic 을 갖는다.
+                    - cnode03 서버에 생성한다.
+                    - master_UTM VM을 green interface의 gateway로 설정한다                        
+                    - master UTM VM을 통해 고객 서버 VM(orange vm)에 통신한다. (iperf client 이용)
+                    - master UTM VM을 통해 외부 서버 VM(red vm)에 통신한다. (iperf client 이용)
+                    - fixed_ip를 제공하여 VM 생성
+                    - 동적으로 생성된 userdata file 사용
+                    
+                - Orange 고객 서버 VM 생성
+                    - global_mgmt, master_orange 2개의 nic 을 갖는다.
+                    - cnode03 서버에 생성한다.
+                    - master_UTM VM을 orange interface의 gateway로 설정한다
+                    - master UTM VM을 통해 클라이언트 VM(green vm)과 통신한다. (iperf server 이용)
+                    - master UTM VM을 통해 외부 서버 VM(red vm)에 통신한다. (iperf client 이용)
+                    - fixed_ip를 제공하여 VM 생성
+                    - 동적으로 생성된 userdata file 사용
+                    - userdata를 이용하여 iperf를 백그라운드로 실행
+                    
+                - RED 외부 서버 VM 생성
+                    - global_mgmt, master_red 2개의 nic 을 갖는다.
+                    - cnode03 서버에 생성한다.
+                    - master_UTM VM을 red interface의 gateway로 설정한다
+                    - master UTM VM을 통해 클라이언트 VM(green vm)과 통신한다. (iperf server 이용)
+                    - master UTM VM을 통해 고객서버 VM(orange vm)과 통신한다. (iperf server 이용)
+                    - fixed_ip를 제공하여 VM 생성
+                    - 동적으로 생성된 userdata file 사용
+                    - userdata를 이용하여 iperf를 백그라운드로 실행                        
+        
+                
+                
+                
+                                    

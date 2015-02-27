@@ -1,0 +1,114 @@
+Ubuntu로 UTM 에뮬레이션 준비
+0. Ubuntu-UTM VM 생성
+
+0) Havana(211.224.204.147) 에 접속하여 /root/admin/openstack/nova 폴더로 이동
+
+# cd /root/admin/openstack/nova
+
+1) nova-boot.sh를 수정하여 VM에 할당할 NIC 정보 설정
+
+181 let "nw_bit=2#1011"
+182 make_customer_vm \
+183     ubuntu_utm ubuntu-12.04 seocho.seoul.zo.kt havana \
+184     $nw_bit $RED_PUBLIC_NET $GREEN_VLAN1_NET $ORANGE_VLAN1_NET $TEST_NET $PUB_NET
+
+* nw_bit에 설정되는 각 비트는 각각 아래와 같이 연결됨
+- 0001 = GREEN Net
+- 0010 = ORANGE Net
+- 0100 = RED Net
+- 1000 = Guest Net
+
+* VM에 NIC을 할당하는 순서는 1) Guest Net, 2) GREEN Net, 3) ORANGE Net, 4) RED Net 임
+
+1. 사전준비
+
+Havana(211.224.204.147) 에서 Ubuntu_UTM의 GREEN/ORANGE tap/qvb 인터페이스의 이름과 linux bridge 정보를 list-vm.sh를 실행하여 확인
+
+ubuntu-utm
+        DEV_IP= 10.10.10.7     DEV_TAP= tapc39d9b26-2e BR_Q= qbrc39d9b26-2e DEV_QVB= qvbc39d9b26-2e DEV_QVO= qvoc39d9b26-2e
+        DEV_IP= 192.168.0.5    DEV_TAP= tapa0ed3174-94 BR_Q= qbra0ed3174-94 DEV_QVB= qvba0ed3174-94 DEV_QVO= qvoa0ed3174-94
+        DEV_IP= 192.168.0.229  DEV_TAP= tapc904df21-71 BR_Q= qbrc904df21-71 DEV_QVB= qvbc904df21-71 DEV_QVO= qvoc904df21-71
+
+green vm의 ip 정보 확인
+forbiz_green_net: 192.168.0.3
+forbiz_guest_net: 10.10.10.2
+
+orange vm의 ip 정보 확인
+forbiz_orange_net: 192.168.0.227
+forbiz_guest_net: 10.10.10.5
+
+2. 루프 방지를 위해 ubuntu-utm의 qbr들에 대해 hairpin off를 수행
+
+Green 인터페이스쪽
+# brctl hairpin qbra0ed3174-94 tapa0ed3174-94 off
+# brctl hairpin qbra0ed3174-94 qvba0ed3174-94 off
+
+Orange 인터페이스쪽
+# brctl hairpin qbrc904df21-71 tapc904df21-71  off
+# brctl hairpin qbrc904df21-71 qvbc904df21-71  off
+
+3. Ubuntu-UTM 설정
+
+0) Havana(211.224.204.147) 에 접속하여 /root/admin/openstack/netns 폴더로 이동하여 netns.sh 명령을 이용하여 Ubuntu-UTM VM에 접속
+
+# cd /root/admin/openstack/netns/
+# ./netns.sh ssh 10.10.10.7
+
+1) brctl 명령을 이용하기 위해 bridge-utils 설치
+
+# apt-get -y update
+# apt-get install -y bridge-utils
+
+2) ip_forward를 활성화
+
+# cat /proc/sys/net/ipv4/ip_forward
+# echo 1 > /proc/sys/net/ipv4/ip_forward
+
+3) GREEN (eth1) 과 ORANGE (eth2) 인터페이스를 up 
+
+#  ifconfig eth1 up
+#  ifconfig eth2 up
+
+4) brctl 명령으로 br0 생성 및 GREEN/ORANGE 인터페이스를 br0에 연결
+
+# brctl addbr br0
+# brctl addif br0 eth1
+# brctl addif br0 eth2
+
+5) br0에 GREEN 인터페이스에 할당된 IP인 192.168.0.5를 할당
+
+#  ifconfig br0 192.168.0.5/24
+
+4. Havana의 iptables룰 수정
+
+1) 211.224.204.132에 접속하여 /root/admin/openstack/test/network 폴더로 이동
+
+# cd /root/admin/openstack/test/network/
+#  vi cfg/test-node.cfg
+
+2) test-node.cfg 내용을 수정하여 ubuntu-utm의 GREEN/ORANGE 인터페이스 정보를 입력
+- 주의할 점은 tapa0ed3174-94 중 tap이후 10글자인 a0ed3174-9만 입력해야 함
+
+TAP_GREEN_ID="a0ed3174-9"
+NET_GREEN="0.0.0.0/0"
+TAP_ORANGE_ID="c904df21-7"
+NET_ORANGE="0.0.0.0/0"
+
+3)  add-cnode-iptables-rules.sh 를 실행하여 Havana iptables rule에 0.0.0.0/0에 대한 라인을 삽입
+
+# ./add-cnode-iptables-rules.sh
+
+5. Green VM에 접속하여 연결 테스트
+
+0) Havana(211.224.204.147) 에 접속하여 /root/admin/openstack/netns 폴더로 이동하여 netns.sh 명령을 이용하여 Green VM에 접속
+
+# cd /root/admin/openstack/netns/
+# ./netns.sh ssh 10.10.10.2
+
+1) Ubuntu-UTM의 br0에 ping 
+
+# ping 192.168.0.5
+
+2) Orange node의 br0에 ping
+
+# ping 192.168.0.227

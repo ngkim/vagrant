@@ -1,0 +1,101 @@
+#!/bin/bash
+
+source ./common_lib
+
+#
+# 고객이름 변수
+zo_user=$1
+
+#
+# openstack CLI env variable  
+export OS_TENANT_NAME=admin
+export OS_USERNAME=admin
+export OS_PASSWORD=ohhberry3333
+export OS_AUTH_URL=http://10.0.200.101:5000/v2.0/
+export OS_NO_CACHE=1
+export OS_VOLUME_API_VERSION=2
+
+REGION=regionOne
+DOMAIN=seocho.daejon.go.kt
+HOST_AGGR_NAME=go-aggr
+AVAILABILITY_ZONE=daejon-az
+
+# admin account info
+ADMIN_TENANT_NAME=$OS_TENANT_NAME
+ADMIN_USER_NAME=$OS_USERNAME
+ADMIN_USER_PASS=$OS_PASSWORD
+
+# LJG: public network(floating ip 할당용)
+#      현재 West 에서 90번까지는 사용하는 듯함.
+ADMIN_TENANT_NAME=admin
+ADMIN_TENANT_ID=$(keystone tenant-list | grep "${ADMIN_TENANT_NAME} " | awk '{print $2}')
+echo "$ADMIN_TENANT_NAME -> $ADMIN_TENANT_ID"
+
+ADMIN_KEY=adminkey
+ADMIN_KEY_FILE=${ADMIN_KEY}.pub
+
+PUBLIC_NET=public_net
+PUBLIC_SUBNET=public_subnet
+#PUBLIC_SUBNET_CIDR=221.151.188.0/24
+#PUBLIC_SUBNET_GW=221.151.188.254
+PUBLIC_SUBNET_CIDR=10.0.100.0/24
+PUBLIC_SUBNET_GW=10.0.100.1
+
+# seocho
+#PUBLIC_IP_POOL_START=221.151.188.65
+#PUBLIC_IP_POOL_END=221.151.188.126
+PUBLIC_IP_POOL_START=10.0.100.10
+PUBLIC_IP_POOL_END=10.0.100.100
+
+FLOATING_IP_POOL_NAME=$PUBLIC_NET
+
+# dns setting
+DNS_SERVER1=8.8.8.8
+DNS_SERVER2=8.8.4.4
+
+PUBLIC_PHYSNET_NAME=physnet_ext
+
+
+# global management net info
+MGMT_NET=global_mgmt_net
+MGMT_SUBNET=global_mgmt_subnet
+MGMT_SUBNET_CIDR=10.10.10.1/24
+MGMT_ROUTER=global_mgmt_router
+
+
+echo "##########################################################################"    
+echo "(#) 프로그램 구성변수 설명"
+echo "##########################################################################"    
+
+echo   "# openstack CLI env variable"
+printf "    %-30s => %s  \n" OS_TENANT_NAME $OS_TENANT_NAME
+printf "    %-30s => %s  \n" OS_USERNAME $OS_USERNAME
+printf "    %-30s => %s  \n" OS_PASSWORD $OS_PASSWORD
+printf "    %-30s => %s  \n" OS_AUTH_URL $OS_AUTH_URL
+printf "    %-30s => %s  \n" OS_NO_CACHE $OS_NO_CACHE
+printf "    %-30s => %s  \n" OS_VOLUME_API_VERSION $OS_VOLUME_API_VERSION
+
+echo
+
+echo   "# admin account info"
+printf "    %-30s => %s  \n" ADMIN_TENANT_NAME $ADMIN_TENANT_NAME
+printf "    %-30s => %s  \n" ADMIN_USER_NAME $ADMIN_USER_NAME
+printf "    %-30s => %s  \n" ADMIN_USER_PASS $ADMIN_USER_PASS
+echo
+
+echo   "# provider network info"
+printf "    %-30s => %s  \n" PUBLIC_NET 			$PUBLIC_NET
+printf "    %-30s => %s  \n" PUBLIC_SUBNET 			$PUBLIC_SUBNET
+printf "    %-30s => %s  \n" PUBLIC_SUBNET_CIDR 	$PUBLIC_SUBNET_CIDR
+printf "    %-30s => %s  \n" PUBLIC_SUBNET_GW 		$PUBLIC_SUBNET_GW
+printf "    %-30s => %s  \n" PUBLIC_IP_POOL_START	$PUBLIC_IP_POOL_START
+printf "    %-30s => %s  \n" PUBLIC_IP_POOL_END 	$PUBLIC_IP_POOL_END
+echo
+
+printf "    %-30s => %s  \n" MGMT_NET 			$MGMT_NET
+printf "    %-30s => %s  \n" MGMT_SUBNET 		$MGMT_SUBNET
+printf "    %-30s => %s  \n" MGMT_SUBNET_CIDR 	$MGMT_SUBNET_CIDR
+printf "    %-30s => %s  \n" MGMT_ROUTER 		$MGMT_ROUTER
+
+
+ask_continue_stop

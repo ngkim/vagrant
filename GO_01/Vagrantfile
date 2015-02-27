@@ -18,7 +18,7 @@ require "../include/vnode.rb"
 # ==> vnode.rb를 수정하여 Range를 Array로 변환하도록 설정함 
 # (기존 버전 Vagrantfile들도 수정 필요) 
 
-mgmt_sw    = Node.new("MGMT-SW" ,   (1..7) , 2, 2048, 23010)
+mgmt_sw    = Node.new("MGMT-SW" ,  (1..7)  , 2, 2048, 23010)
 aggr_sw    = Node.new("AGGR-SW" ,  (8..13) , 4, 2048, 23014, -1, -1, "em1")
 accs_sw    = Node.new("ACCS-SW" ,  [10,14] , 2, 2048, 23011)
 stor_sw    = Node.new("STOR-SW" ,  [11,15] , 2, 2048, 23012)
@@ -34,7 +34,9 @@ public     = Node.new("PUBLIC"	, [7,16]         , 2, 2048, 23024)
 switches = [ mgmt_sw, aggr_sw, accs_sw, stor_sw, core_sw ]
 nodes    = [ orch_node, all_in_one, customer, server, public ]
 ###############################################################################
-# IMPORTANT: use your own link_prefix to avoid duplication error with other vagrant instances
+# IMPORTANT: use your own link_prefix to avoid duplication error 
+# with other vagrant instances
+
 #link_prefix="openstack-mn-1c"
 # use current directory name as link_prefix 
 link_prefix=File.basename(Dir.getwd)
@@ -93,8 +95,8 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   
   nodes.each do | node |
     hostname 		= node.get_hostname
-    cpu 		= node.get_cpu
-    memory 		= node.get_memory
+    cpu 		    = node.get_cpu
+    memory 		    = node.get_memory
     ssh_nat_port 	= node.get_ssh_nat_port
     http_nat_port 	= node.get_http_nat_port
     novnc_nat_port 	= node.get_novnc_nat_port
@@ -135,6 +137,5 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 
       #cfg_node.vm.synced_folder "../openstack", "/root/openstack", disabled: false
     end
-  end 
-    
+  end
 end

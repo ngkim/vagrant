@@ -170,7 +170,7 @@ dump_flows() {
 init_ovs    $BR0 BR0_ITFS[@]
 add_groups  $BR0 BR0_ITFS[@]
 ext_groups  $BR0 EXT_GROUPS[@] $BASE_GROUP_ID
-clear_flows $BR0 
+#clear_flows $BR0 
 add_flows   $BR0 FLOW_RULES[@]
 dump_groups $BR0
 dump_flows  $BR0

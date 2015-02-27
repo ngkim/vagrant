@@ -1,0 +1,174 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+
+#
+# LJG 상식:: 
+#   Vagrantfile 이 존재하는 디렉토리는 VM의 /vagrant 디렉토리에 
+#   synced_folder로 존재한다. 이게 Version1에서는 shared_folder이었다.
+#
+#   쉘을 이용한 프로비저닝은 에러시 디버깅이 어려우므로 테스트단계에서는
+#   직접 /vagrant 디렉토리에서 설치하는 것이 건강에 이롭다.
+
+
+#
+# openstack 구성 노드 설정
+
+nodes = {
+    'anode'  => [1, 11],
+    
+    #'cnode01'=> [1, 21],
+    #'cnode02'=> [1, 31]
+}
+                
+Vagrant.configure("2") do |config|
+    
+    # 기본이미지는 우분투 14.04로 설정
+    config.vm.box = "trusty64"
+    config.vm.box_url = "http://cloud-images.ubuntu.com/vagrant/trusty/current/trusty-server-cloudimg-amd64-vagrant-disk1.box"
+
+    # Default is 2200..something, but port 2200 is used by forescout NAC agent.
+    config.vm.usable_port_range= 2800..2900
+    
+    # vagrant cache 사용여부 -> 이를 사용하기 위해서는 다음과 같이 cache plugin 을 미리 설치해야 함.
+    # -> vagrant plugin install vagrant-cachier
+    
+    if Vagrant.has_plugin?("vagrant-cachier")
+        config.cache.scope = :box
+        config.cache.enable :apt
+    else
+        puts "[-] WARN: This would be much faster if you ran vagrant plugin install vagrant-cachier first"
+    end
+
+    nodes.each do |prefix, (count, ip_start)|
+        count.times do |i|
+            # hostname = "%s%02d" % [prefix, (i+1)]
+            hostname = "%s" % [prefix]
+
+            config.vm.define "#{hostname}" do |box|
+            
+                box.vm.hostname = "#{hostname}"
+                
+                #
+                # 네트워크 NIC 설정
+                
+                # 버츄얼박스에서 첫번째 NIC(em1)은 기본적으로 NAT로 설정된다.
+                # 이를 통해 모든 VM들은 외부와 통신을 수행한다.
+                #   => LJG:: production에서는 보안이슈로 이렇게 하면 안됨!!!
+                # VirtualBox는 NAT, Host Network, Bridging 네트워크 3가지 모드를 지원
+                #
+                                
+                box.vm.provision "shell", inline: "sudo apt-get update"
+                box.vm.provision "shell", inline: "sudo apt-get -y install dos2unix"
+                # LJG: 쉘을 실행하기 위해서 실행권한을 설정해야 함.
+                box.vm.provision "shell", inline: "sudo chmod 755 /vagrant/*.sh"
+                # windows에서 생성된 파일을 unix포멧으로 변경
+                #box.vm.provision "shell", inline: "sudo dos2unix ~/*"
+                
+                #
+                # 개별노드 설정
+                
+                if prefix == "anode"
+                    
+                    # 포트포워딩 설정    
+                    box.vm.network "forwarded_port", guest: 22,   host: 30022, id: "ssh", protocol: "tcp"
+                    box.vm.network "forwarded_port", guest: 80,   host: 30080, id: "web"  # openstack horizon
+                    box.vm.network "forwarded_port", guest: 3306, host: 33306, id: "db"   # openstack db                           
+                    box.vm.network "forwarded_port", guest: 15672,host: 35672, id: "mq"   # openstack rabbit-mq
+                    box.vm.network "forwarded_port", guest: 6080, host: 36080, id: "vnc"  # openstack vnc
+                    box.vm.network "forwarded_port", guest: 6632, host: 36632, id: "ovsdb"# ovs-db
+                    
+                    # NIC 설정
+                    
+                    # management nic(eth1)
+                    box.vm.network "private_network", ip: "172.16.0.#{ip_start}", netmask: "255.255.0.0"
+                                    
+                    # external nic(eth2) -> LJG: 이게 어떻게 외부와 통신이 되는지는 파악해봐야 겠다.
+                    box.vm.network "private_network", ip: "192.168.100.#{ip_start}",netmask: "255.255.255.0"
+                    
+                    # api nic(eth3)
+                    box.vm.network "private_network", ip: "192.168.110.#{ip_start}",netmask: "255.255.255.0"
+                    
+                    # guest nic(eth4) 
+                    box.vm.network "private_network", ip: "10.10.0.#{ip_start}",   netmask: "255.255.255.0"
+                    
+                    # lan nic(eth5) 
+                    box.vm.network "private_network", ip: "10.10.10.#{ip_start}",   netmask: "255.255.255.0"
+                    
+                    # wan nic(eth6) 
+                    box.vm.network "private_network", ip: "10.10.20.#{ip_start}",   netmask: "255.255.255.0"
+                    
+                    
+                    # 쉘프로비저닝
+                    #box.vm.provision "shell", path: "controller.sh"
+                    #box.vm.provision "shell", path: "network.sh"
+                    #box.vm.provision "shell", path: "compute.sh" 
+                    
+                end
+                
+                if prefix == "cnode01"
+                    #{ip_start}
+                    # 포트포워딩 설정                    
+                    box.vm.network "forwarded_port", guest: 22,   host: 31022, id: "ssh"
+                    box.vm.network "forwarded_port", guest: 6632, host: 31632, id: "ovsdb"# ovs-db
+                    
+                    # NIC 설정
+                    
+                    # management nic(eth1) 
+                    box.vm.network "private_network", ip: "172.16.0.#{ip_start}",  netmask: "255.255.0.0"                
+                    # guest nic(eth2) 
+                    box.vm.network "private_network", ip: "10.10.0.#{ip_start}",   netmask: "255.255.0.0"                    
+                    
+                    # 쉘프로비저닝
+                    #box.vm.provision "shell", path: "compute.sh"
+                end                
+                
+                if prefix == "cnode02"
+                    #{ip_start}
+                    # 포트포워딩 설정                    
+                    box.vm.network "forwarded_port", guest: 22,   host: 32022, id: "ssh"
+                    box.vm.network "forwarded_port", guest: 6632, host: 32632, id: "ovsdb"# ovs-db
+                    
+                    # NIC 설정
+                    
+                    # management nic(eth1) 
+                    box.vm.network "private_network", ip: "172.16.0.#{ip_start}",  netmask: "255.255.0.0"                
+                    # guest nic(eth2) 
+                    box.vm.network "private_network", ip: "10.10.0.#{ip_start}",   netmask: "255.255.0.0"                    
+                    
+                    # 쉘프로비저닝
+                    #box.vm.provision "shell", path: "compute.sh"
+                end
+                
+                #
+                # VirtualBox를 사용해서 개별 노드 설정
+                
+                box.vm.provider :virtualbox do |vbox|                
+    	            # Defaults
+                    vbox.customize ["modifyvm", :id, "--memory", 1024]
+                    vbox.customize ["modifyvm", :id, "--cpus", 1]
+    		        
+    		        if prefix == "anode"
+                    	vbox.customize ["modifyvm", :id, "--memory", 2048]
+                        vbox.customize ["modifyvm", :id, "--cpus", 2]
+                        
+                        # ext nic
+                        vbox.customize ["modifyvm", :id, "--nicpromisc3", "allow-all"]
+                        # guest nic
+    			        vbox.customize ["modifyvm", :id, "--nicpromisc5", "allow-all"]
+    			        # lan nic
+    			        vbox.customize ["modifyvm", :id, "--nicpromisc6", "allow-all"]
+    			        # wan nic
+    			        vbox.customize ["modifyvm", :id, "--nicpromisc7", "allow-all"]
+    		        end
+    		        
+    		        if prefix == "cnode01" or prefix == "cnode02"
+                        vbox.customize ["modifyvm", :id, "--memory", 2048]
+                        vbox.customize ["modifyvm", :id, "--cpus", 1]
+                        vbox.customize ["modifyvm", :id, "--nicpromisc3", "allow-all"]                    
+                    end
+                end
+            end
+        end
+    end
+end
