@@ -16,11 +16,15 @@ require "../include/vnode.rb"
 #       alloc_pnat_ssh()를 호출하면 다음 가용한 포트번호 반환
 
 # mgr_node는 NAT 포트 하나로 동작
-mgr_node  = Node.new("ORCH"	, []    , 2, 2048, 23031)
+mgr_node  = Node.new("ORCH"	, []    , 2, 2048, 23051)
 
 # list of nodes and switches
 switches = [ ]
 nodes    = [ mgr_node ]
+
+# NAT 
+portal_nat_port = 23052
+rest_nat_port   = 23053
 ###############################################################################
 # IMPORTANT: use your own link_prefix to avoid duplication error 
 # with other vagrant instances
@@ -122,6 +126,8 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
       if novnc_nat_port != -1
         cfg_node.vm.network :forwarded_port, guest: 6080, host: "#{novnc_nat_port}", id: "novnc"  
       end
+      cfg_node.vm.network :forwarded_port, guest: 8080, host: "#{portal_nat_port}", id: "portal"  
+      cfg_node.vm.network :forwarded_port, guest: 9999, host: "#{rest_nat_port}", id: "rest"  
 
       #cfg_node.vm.synced_folder "../openstack", "/root/openstack", disabled: false
     end
