@@ -56,7 +56,7 @@ run() {
 }
 
 prerequisite() {
-  sudo apt-get install -y python-pip libpq-dev python-dev language-pack-en language-pack-ko
+  sudo apt-get install -y subversion python-pip libpq-dev python-dev language-pack-en language-pack-ko
 
   sudo pip install pyconvert==0.4.alpha
   sudo pip install pyrestful==0.3.2.alpha
