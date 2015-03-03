@@ -1,0 +1,171 @@
+
+#
+# network 생성 테스트
+# -> orange와 red가 동일 vlan(11)을 사용해도 잘 생성됨
+
+
+neutron net-create green_vlan --os-region-name regionOne --tenant-id 83b121e732204e228a7995f159732826 --provider:network_type vlan --provider:physical_network physnet_lan --provider:segmentation_id 10
+Created a new network:
++---------------------------+--------------------------------------+
+| Field                     | Value                                |
++---------------------------+--------------------------------------+
+| admin_state_up            | True                                 |
+| id                        | 88e821fb-6284-4ced-99ad-feb7ca74b5c6 |
+| name                      | green_vlan                           |
+| provider:network_type     | vlan                                 |
+| provider:physical_network | physnet_lan                          |
+| provider:segmentation_id  | 10                                   |
+| shared                    | False                                |
+| status                    | ACTIVE                               |
+| subnets                   |                                      |
+| tenant_id                 | 83b121e732204e228a7995f159732826     |
++---------------------------+--------------------------------------+
+
+root@anode:~# neutron net-create orange_vlan --os-region-name regionOne --tenant-id 83b121e732204e228a7995f159732826 --provider:network_type vlan --provider:physical_network physnet_lan --provider:segmentation_id 11
+Created a new network:
++---------------------------+--------------------------------------+
+| Field                     | Value                                |
++---------------------------+--------------------------------------+
+| admin_state_up            | True                                 |
+| id                        | 6e96eccb-b91e-47e9-8012-0ff7ccfb5365 |
+| name                      | orange_vlan                          |
+| provider:network_type     | vlan                                 |
+| provider:physical_network | physnet_lan                          |
+| provider:segmentation_id  | 11                                   |
+| shared                    | False                                |
+| status                    | ACTIVE                               |
+| subnets                   |                                      |
+| tenant_id                 | 83b121e732204e228a7995f159732826     |
++---------------------------+--------------------------------------+
+root@anode:~# !57
+neutron net-create red_vlan --os-region-name regionOne --tenant-id 83b121e732204e228a7995f159732826 --provider:network_type vlan --provider:physical_network physnet_wan --provider:segmentation_id 11
+Created a new network:
++---------------------------+--------------------------------------+
+| Field                     | Value                                |
++---------------------------+--------------------------------------+
+| admin_state_up            | True                                 |
+| id                        | 42774aac-ab95-4924-8ff8-58e5313356c2 |
+| name                      | red_vlan                             |
+| provider:network_type     | vlan                                 |
+| provider:physical_network | physnet_wan                          |
+| provider:segmentation_id  | 11                                   |
+| shared                    | False                                |
+| status                    | ACTIVE                               |
+| subnets                   |                                      |
+| tenant_id                 | 83b121e732204e228a7995f159732826     |
++---------------------------+--------------------------------------+
+root@anode:~# neutron net-list
++--------------------------------------+-------------+---------+
+| id                                   | name        | subnets |
++--------------------------------------+-------------+---------+
+| 42774aac-ab95-4924-8ff8-58e5313356c2 | red_vlan    |         |
+| 6e96eccb-b91e-47e9-8012-0ff7ccfb5365 | orange_vlan |         |
+| 88e821fb-6284-4ced-99ad-feb7ca74b5c6 | green_vlan  |         |
++--------------------------------------+-------------+---------+
+
+
+
+
+
+
+#
+# sub network 생성 테스트
+# -> 모든 subnet이 잘 생성됨
+#    green  -> dhcp enable
+#    orange -> dhcp disable
+#    red    -> dhcp disable
+
+
+
+neutron subnet-create green_vlan 192.168.0.1/24 \
+    --os-region-name regionOne \
+    --tenant-id 83b121e732204e228a7995f159732826 \
+    --allocation-pool start=192.168.0.10,end=192.168.0.200 \
+    --enable_dhcp=True \
+    --dns-nameservers list=true 8.8.8.8 8.8.4.4 \
+    --name green_vlan_subnet
+
+Created a new subnet:
++------------------+---------------------------------------------------+
+| Field            | Value                                             |
++------------------+---------------------------------------------------+
+| allocation_pools | {"start": "192.168.0.10", "end": "192.168.0.200"} |
+| cidr             | 192.168.0.0/24                                    |
+| dns_nameservers  | 8.8.4.4                                           |
+|                  | 8.8.8.8                                           |
+| enable_dhcp      | True                                              |
+| gateway_ip       | 192.168.0.1                                       |
+| host_routes      |                                                   |
+| id               | d24db6c5-8b06-4ee0-825c-a1c8af2a4528              |
+| ip_version       | 4                                                 |
+| name             | green_vlan_subnet                                 |
+| network_id       | 88e821fb-6284-4ced-99ad-feb7ca74b5c6              |
+| tenant_id        | 83b121e732204e228a7995f159732826                  |
++------------------+---------------------------------------------------+
+
+neutron subnet-create orange_vlan 192.168.10.1/24 \
+    --os-region-name regionOne \
+    --tenant-id 83b121e732204e228a7995f159732826 \
+    --enable_dhcp=False \
+    --dns-nameservers list=true 8.8.8.8 8.8.4.4 \
+    --name orange_vlan_subnet2
+
+neutron subnet-create orange_vlan 192.168.0.1/24 \
+    --os-region-name regionOne \
+    --tenant-id 83b121e732204e228a7995f159732826 \
+    --enable_dhcp=False \
+    --dns-nameservers list=true 8.8.8.8 8.8.4.4 \
+    --name orange_vlan_subnet
+    
+    
+Created a new subnet:
++------------------+--------------------------------------------------+
+| Field            | Value                                            |
++------------------+--------------------------------------------------+
+| allocation_pools | {"start": "192.168.0.2", "end": "192.168.0.254"} |
+| cidr             | 192.168.0.0/24                                   |
+| dns_nameservers  | 8.8.4.4                                          |
+|                  | 8.8.8.8                                          |
+| enable_dhcp      | False                                            |
+| gateway_ip       | 192.168.0.1                                      |
+| host_routes      |                                                  |
+| id               | 2d3bdab1-acec-4bf0-a7c5-396ffc73adff             |
+| ip_version       | 4                                                |
+| name             | orange_vlan_subnet                               |
+| network_id       | 6e96eccb-b91e-47e9-8012-0ff7ccfb5365             |
+| tenant_id        | 83b121e732204e228a7995f159732826                 |
++------------------+--------------------------------------------------+
+
+neutron subnet-create red_vlan 221.145.180.64/26 \
+    --os-region-name regionOne \
+    --tenant-id 83b121e732204e228a7995f159732826 \
+    --enable_dhcp=False \
+    --dns-nameservers list=true 8.8.8.8 8.8.4.4 \
+    --name red_vlan_subnet
+
+Created a new subnet:
++------------------+-------------------------------------------------------+
+| Field            | Value                                                 |
++------------------+-------------------------------------------------------+
+| allocation_pools | {"start": "221.145.180.66", "end": "221.145.180.126"} |
+| cidr             | 221.145.180.64/26                                     |
+| dns_nameservers  | 8.8.4.4                                               |
+|                  | 8.8.8.8                                               |
+| enable_dhcp      | False                                                 |
+| gateway_ip       | 221.145.180.65                                        |
+| host_routes      |                                                       |
+| id               | d8b3cea8-236a-4660-a2c0-726156d2b3f8                  |
+| ip_version       | 4                                                     |
+| name             | red_vlan_subnet                                       |
+| network_id       | 42774aac-ab95-4924-8ff8-58e5313356c2                  |
+| tenant_id        | 83b121e732204e228a7995f159732826                      |
++------------------+-------------------------------------------------------+
+
+root@anode:~# neutron subnet-list
++--------------------------------------+--------------------+-------------------+-------------------------------------------------------+
+| id                                   | name               | cidr              | allocation_pools                                      |
++--------------------------------------+--------------------+-------------------+-------------------------------------------------------+
+| 2d3bdab1-acec-4bf0-a7c5-396ffc73adff | orange_vlan_subnet | 192.168.0.0/24    | {"start": "192.168.0.2", "end": "192.168.0.254"}      |
+| d24db6c5-8b06-4ee0-825c-a1c8af2a4528 | green_vlan_subnet  | 192.168.0.0/24    | {"start": "192.168.0.10", "end": "192.168.0.200"}     |
+| d8b3cea8-236a-4660-a2c0-726156d2b3f8 | red_vlan_subnet    | 221.145.180.64/26 | {"start": "221.145.180.66", "end": "221.145.180.126"} |
++--------------------------------------+--------------------+-------------------+-------------------------------------------------------+

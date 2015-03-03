@@ -38,7 +38,7 @@ svn_co() {
   REPO=$1
 
   cd $HOME
-  echo "svn checkout $REPO"
+  echo "svn checkout svn://$SVN_SERVER/$REPO --username $SVN_USER --password $SVN_PASS"
   svn checkout svn://$SVN_SERVER/$REPO --username $SVN_USER --password $SVN_PASS
   cd -
 }
@@ -76,13 +76,9 @@ run_commands $cmd
 
 cmd="svn_co ZeroOfficeWeb"
 run_commands $cmd
-run ZeroOfficeWeb startmain.py
 
 cmd="svn_co GOMS_AP"
 run_commands $cmd
-run GOMS_AP startprovision.py
 
 cmd="svn_co CloudManager"
 run_commands $cmd
-run "CloudManager/service" UTMConfigService.py
-run "CloudManager/scheduler" nestatusmonitoring.py

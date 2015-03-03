@@ -174,7 +174,7 @@ ctrl_cinder_restart() {
     #vgcreate cinder-volumes /dev/loop2
 
     #Restart services
-    for c in $( ls /etc/init/cinder-* | cut -d '.' -f1) ; do service $c restart; done
+    for process in $( ls /etc/init/cinder-* | cut -d'/' -f4 | cut -d'.' -f1) ; do service $process restart; done
     
     echo '>>> check result -----------------------------------------------------'
     ps -ef | grep cinder

@@ -17,14 +17,16 @@ require "../include/vnode.rb"
 
 # mgr_node는 NAT 포트 하나로 동작
 mgr_node  = Node.new("ORCH"	, []    , 2, 2048, 23051)
+db_serve  = Node.new("DB-SERV"	, []    , 2, 2048, 23054)
 
 # list of nodes and switches
 switches = [ ]
-nodes    = [ mgr_node ]
+nodes    = [ mgr_node, db_serve ]
 
 # NAT 
 portal_nat_port = 23052
 rest_nat_port   = 23053
+pgsq_nat_port   = 23055
 ###############################################################################
 # IMPORTANT: use your own link_prefix to avoid duplication error 
 # with other vagrant instances
@@ -126,8 +128,13 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
       if novnc_nat_port != -1
         cfg_node.vm.network :forwarded_port, guest: 6080, host: "#{novnc_nat_port}", id: "novnc"  
       end
-      cfg_node.vm.network :forwarded_port, guest: 8080, host: "#{portal_nat_port}", id: "portal"  
-      cfg_node.vm.network :forwarded_port, guest: 9999, host: "#{rest_nat_port}", id: "rest"  
+
+      if hostname == "ORCH"
+        cfg_node.vm.network :forwarded_port, guest: 8080, host: "#{portal_nat_port}", id: "portal"  
+        cfg_node.vm.network :forwarded_port, guest: 9999, host: "#{rest_nat_port}", id: "rest"  
+      elsif hostname == "DB-SERV"
+        cfg_node.vm.network :forwarded_port, guest: 5432, host: "#{pgsq_nat_port}", id: "pgsql"  
+      end
 
       #cfg_node.vm.synced_folder "../openstack", "/root/openstack", disabled: false
     end

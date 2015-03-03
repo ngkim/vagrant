@@ -17,6 +17,7 @@ export DEBIAN_FRONTEND=noninteractive
 #
 # vlan을 위한 physical network 
 #   -> 여기에 선언된 각각의 네트워크에 4096개의 vlan을 제공할 수 있슴
+#   -> neutron설치스크립트의 NEUTRON_PLUGIN_ML2_CONF_INI에서 사용
 
 # vlan용 physical external network 접속 네트워크
 PHY_EXT_NET=physnet_ext

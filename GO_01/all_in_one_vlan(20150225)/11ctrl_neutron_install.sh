@@ -309,10 +309,7 @@ ctrl_neutron_server_restart() {
     ### ctrl_neutron_server_restart() !!!
     # ------------------------------------------------------------------------------'
     
-    for process in $(ls /etc/init/neutron* | cut -d'/' -f4 | cut -d'.' -f1)
-	do
-        service ${process} restart
-	done
+    for process in $(ls /etc/init/neutron* | cut -d'/' -f4 | cut -d'.' -f1);do service ${process} restart;	done
 	    
     echo '>>> check result -----------------------------------------------------'
     ps -ef | grep neutron

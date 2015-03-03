@@ -11,3 +11,6 @@ img
 *.log
 *.err
 *.swp
+*.backup
+*.bak
+*.dump

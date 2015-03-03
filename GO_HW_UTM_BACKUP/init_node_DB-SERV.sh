@@ -9,7 +9,4 @@ EOF
 echo "2. apt-get update"
 sudo apt-get update
 
-echo "Done!!!"
-echo " - First, copy installation scripts to $HOME (cp /vagrant/nfv_mgmt $HOME)"
-echo " - Next,  run nfv control sw installation by executing $HOME/nfv_mgmt/install.sh"
 
