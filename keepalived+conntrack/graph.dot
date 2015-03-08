@@ -1,0 +1,24 @@
+tor_sw      = Node.new("LAN-SW-BRIDGE"  ,  (1..7),    2, 2048, 22210)
+wan_sw      = Node.new("WAN-SW-BRIDGE"  , (8..14),    2, 2048, 22220)
+
+mster_node  = Node.new("SERVER-MSTER"   , [1, 8, 15], 2, 1024, 22201)
+slave_node  = Node.new("SERVER-SLAVE"   , [2, 9, 15], 2, 1024, 22202)
+clint_node  = Node.new("CLIENT"         , [3],        2, 1024, 22203)
+publc_node  = Node.new("PUBLIC"         , [10],       2, 1024, 22204)
+
+
+graph G {
+  "LAN-SW-BRIDGE" [shape=rect, style=filled,fillcolor=gray];
+  "WAN-SW-BRIDGE" [shape=rect, style=filled,fillcolor=gray];
+
+  "SERVER-MSTER" [shape=rect, style=filled,fillcolor=gray];
+  "SERVER-SLAVE" [shape=rect, style=filled,fillcolor=gray];
+
+  "CLIENT" [shape=rect, style=filled,fillcolor=gray];
+  "PUBLIC" [shape=rect, style=filled,fillcolor=gray];
+
+
+
+
+}
+
