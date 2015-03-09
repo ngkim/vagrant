@@ -19,18 +19,18 @@ SYNC_IP_DST=10.0.0.2
 
 echo "sudo apt-get update > /dev/null"
 sudo apt-get update > /dev/null
-echo "sudo apt-get install -y language-pack-en language-pack-ko > /dev/null"
-sudo apt-get install -y language-pack-en language-pack-ko > /dev/null
+echo "sudo apt-get install -y language-pack-en language-pack-ko ifstat > /dev/null"
+sudo apt-get install -y language-pack-en language-pack-ko ifstat > /dev/null
 echo "sudo apt-get install -y keepalived conntrackd conntrack > /dev/null"
 sudo apt-get install -y keepalived conntrackd conntrack > /dev/null
 
 LAN_DEV=eth1
 LAN_VIP="172.16.10.100/24"
-LAN_PRI=100
+LAN_PRI=150
 
 WAN_DEV=eth2
 WAN_VIP=10.15.7.100
-WAN_PRI=100
+WAN_PRI=150
 
 sudo cat > /etc/keepalived/keepalived.conf << EOF
 vrrp_sync_group G1 {
@@ -46,8 +46,13 @@ vrrp_sync_group G1 {
 vrrp_instance LAN {
     interface $LAN_DEV
     state BACKUP
+
     virtual_router_id 62
     priority $LAN_PRI
+
+    use_vmac vrrp62
+    vmac_xmit_base
+
     advert_int 1
     authentication {
         auth_type PASS
@@ -56,7 +61,6 @@ vrrp_instance LAN {
     virtual_ipaddress {
         $LAN_VIP dev $LAN_DEV
     }
-    nopreempt
     garp_master_delay 1
 }
 
@@ -65,6 +69,10 @@ vrrp_instance WAN {
     state BACKUP
     virtual_router_id 61
     priority $WAN_PRI
+
+    use_vmac vrrp61
+    vmac_xmit_base
+
     advert_int 1
     authentication {
         auth_type PASS
@@ -73,7 +81,6 @@ vrrp_instance WAN {
     virtual_ipaddress {
         $WAN_VIP dev $WAN_DEV
     }
-    nopreempt
     garp_master_delay 1
 }
 

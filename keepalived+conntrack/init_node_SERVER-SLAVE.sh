@@ -27,8 +27,8 @@ sudo ifconfig eth3 10.0.0.2/24 up
 
 echo "sudo apt-get update > /dev/null"
 sudo apt-get update > /dev/null
-echo "sudo apt-get install -y language-pack-en language-pack-ko > /dev/null"
-sudo apt-get install -y language-pack-en language-pack-ko > /dev/null
+echo "sudo apt-get install -y language-pack-en language-pack-ko ifstat > /dev/null"
+sudo apt-get install -y language-pack-en language-pack-ko ifstat > /dev/null
 echo "sudo apt-get install -y keepalived conntrack conntrackd > /dev/null"
 sudo apt-get install -y keepalived conntrack conntrackd > /dev/null
 
@@ -48,6 +48,10 @@ vrrp_instance LAN {
     state BACKUP
     virtual_router_id 62
     priority $LAN_PRI
+
+    use_vmac vrrp62
+    vmac_xmit_base
+
     advert_int 1
     authentication {
         auth_type PASS
@@ -56,7 +60,6 @@ vrrp_instance LAN {
     virtual_ipaddress {
         $LAN_VIP dev $LAN_DEV
     }
-    nopreempt
     garp_master_delay 1
 }
 
@@ -65,6 +68,10 @@ vrrp_instance WAN {
     state BACKUP
     virtual_router_id 61
     priority $WAN_PRI
+ 
+    use_vmac vrrp61
+    vmac_xmit_base
+
     advert_int 1
     authentication {
         auth_type PASS
@@ -73,7 +80,6 @@ vrrp_instance WAN {
     virtual_ipaddress {
         $WAN_VIP dev $WAN_DEV
     }
-    nopreempt
     garp_master_delay 1
 }
 
