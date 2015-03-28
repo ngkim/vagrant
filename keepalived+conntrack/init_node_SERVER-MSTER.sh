@@ -17,20 +17,20 @@ SYNC_DEV=eth3
 SYNC_IP_LOC=10.0.0.1
 SYNC_IP_DST=10.0.0.2
 
+LAN_DEV=eth1
+LAN_VIP="172.16.10.100/24"
+LAN_PRI=150
+
+WAN_DEV=eth2
+WAN_VIP="10.15.7.100/24"
+WAN_PRI=150
+
 echo "sudo apt-get update > /dev/null"
 sudo apt-get update > /dev/null
 echo "sudo apt-get install -y language-pack-en language-pack-ko ifstat > /dev/null"
 sudo apt-get install -y language-pack-en language-pack-ko ifstat > /dev/null
 echo "sudo apt-get install -y keepalived conntrackd conntrack > /dev/null"
 sudo apt-get install -y keepalived conntrackd conntrack > /dev/null
-
-LAN_DEV=eth1
-LAN_VIP="172.16.10.100/24"
-LAN_PRI=150
-
-WAN_DEV=eth2
-WAN_VIP=10.15.7.100
-WAN_PRI=150
 
 sudo cat > /etc/keepalived/keepalived.conf << EOF
 vrrp_sync_group G1 {
@@ -50,7 +50,7 @@ vrrp_instance LAN {
     virtual_router_id 62
     priority $LAN_PRI
 
-    use_vmac vrrp62
+    use_vmac vrrp-lan
     vmac_xmit_base
 
     advert_int 1
@@ -70,7 +70,7 @@ vrrp_instance WAN {
     virtual_router_id 61
     priority $WAN_PRI
 
-    use_vmac vrrp61
+    use_vmac vrrp-wan
     vmac_xmit_base
 
     advert_int 1

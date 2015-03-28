@@ -14,7 +14,7 @@ LAN_VIP="172.16.10.100/24"
 LAN_PRI=101
 
 WAN_DEV=eth2
-WAN_VIP=10.15.7.100
+WAN_VIP="10.15.7.100/24"
 WAN_PRI=101
 
 SYNC_DEV=eth3
@@ -49,7 +49,7 @@ vrrp_instance LAN {
     virtual_router_id 62
     priority $LAN_PRI
 
-    use_vmac vrrp62
+    use_vmac vrrp-lan
     vmac_xmit_base
 
     advert_int 1
@@ -69,7 +69,7 @@ vrrp_instance WAN {
     virtual_router_id 61
     priority $WAN_PRI
  
-    use_vmac vrrp61
+    use_vmac vrrp-wan
     vmac_xmit_base
 
     advert_int 1
