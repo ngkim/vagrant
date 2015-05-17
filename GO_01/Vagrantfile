@@ -19,7 +19,7 @@ require "../include/vnode.rb"
 # (기존 버전 Vagrantfile들도 수정 필요) 
 
 mgmt_sw    = Node.new("MGMT-SW" ,  (1..7)  , 2, 2048, 23010)
-aggr_sw    = Node.new("AGGR-SW" ,  (8..13) , 4, 2048, 23014, -1, -1, "em1")
+aggr_sw    = Node.new("AGGR-SW" ,  (8..13) , 4, 2048, 23314, -1, -1, "em1")
 accs_sw    = Node.new("ACCS-SW" ,  [10,14] , 2, 2048, 23011)
 stor_sw    = Node.new("STOR-SW" ,  [11,15] , 2, 2048, 23012)
 core_sw    = Node.new("CORE-SW" ,  [13,16] , 2, 2048, 23013)
