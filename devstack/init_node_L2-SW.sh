@@ -2,7 +2,7 @@
 
 BR1="br0"
 
-BR1_ITFS=("eth1" "eth2" "eth3" "eth4" "eth5" "eth6" "eth7")
+BR1_ITFS=("eth1" "eth2")
 
 init_bridge() {
 	BR_NAME=$1
@@ -20,12 +20,11 @@ init_bridge() {
             sudo ifconfig $itf up
 	done
 
-        sudo ifconfig $BR_NAME up
+    sudo ifconfig $BR_NAME up
 }
 
 sudo apt-get update
 sudo apt-get install -y bridge-utils
 
 init_bridge $BR1 BR1_ITFS[@]
-
 
