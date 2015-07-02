@@ -30,6 +30,24 @@ EOF
 
 }
 
+config_mgmt_interface() {
+	local NIC=$1
+	local MGMT_IP=$2
+	local MGMT_SBNET=$3
+	
+	print_title "management network interface: $NIC"
+	
+	cat > <<EOF
+# management network
+auto $NIC
+iface $NIC inet static
+    address $_mgmt_ip
+    netmask $_mgmt_subnet_mask
+EOF
+}
+
+config_mgmt_interface eth1 10.0.0.11 255.255.255.0
+
 config_hosts() {
 	print_title "/etc/hosts"
 	
@@ -45,32 +63,30 @@ config_external_interface $EXT_NIC
 config_hosts
 
 tmp() {
+	apt-get -y install ntp
 /etc/ntp.conf 파일 수정
 
-	server ntp.ubuntu.com iburst
+	server ntp.ubuntu.com iburst	
 
-	restrict -4 default kod notrap nomodify nopeer noquery
-	restrict -6 default kod notrap nomodify nopeer noquery
+rm -rf /var/lib/ntp/ntp.conf.dhcp
+service ntp restart
 
- # rm -rf /var/lib/ntp/ntp.conf.dhcp
- # service ntp restart
-
-# apt-get install -y ubuntu-cloud-keyring
-# echo "deb http://ubuntu-cloud.archive.canonical.com/ubuntu" \
+apt-get install -y ubuntu-cloud-keyring
+echo "deb http://ubuntu-cloud.archive.canonical.com/ubuntu" \
   "trusty-updates/kilo main" > /etc/apt/sources.list.d/cloudarchive-kilo.list
   
-# apt-get update && apt-get dist-upgrade
+apt-get update && apt-get dist-upgrade -y
 
------------------------------------------------------------------------------------------------------------------------
-	2. DB 
------------------------------------------------------------------------------------------------------------------------
+#-----------------------------------------------------------------------------------------------------------------------
+print_title "2. DB" 
+#-----------------------------------------------------------------------------------------------------------------------
 
-# apt-get install -y mariadb-server python-mysqldb
+apt-get install -y mariadb-server python-mysqldb
 
->> ROOT DB 패스워드 설정
-
-/etc/mysql/conf.d/mysqld_openstack.cnf 파일 수정
-
+mysqld_openstack() {
+	print_title "/etc/mysql/conf.d/mysqld_openstack.cnf"
+	
+	cat > /etc/mysql/conf.d/mysqld_openstack.cnf <<EOF
 [mysqld]
 bind-address = 10.0.0.11
 default-storage-engine = innodb
@@ -78,114 +94,47 @@ innodb_file_per_table
 collation-server = utf8_general_ci
 init-connect = 'SET NAMES utf8'
 character-set-server = utf8
+EOF
 
-# service mysql restart
-# mysql_secure_installation
-	NOTE: RUNNING ALL PARTS OF THIS SCRIPT IS RECOMMENDED FOR ALL MariaDB
-	      SERVERS IN PRODUCTION USE!  PLEASE READ EACH STEP CAREFULLY!
-	
-	In order to log into MariaDB to secure it, we'll need the current
-	password for the root user.  If you've just installed MariaDB, and
-	you haven't set the root password yet, the password will be blank,
-	so you should just press enter here.
-	
-	Enter current password for root (enter for none):
-		OK, successfully used password, moving on...
+service mysql restart
+
+}
+
+mysql_secure_installation
 		
-		Setting the root password ensures that nobody can log into the MariaDB
-		root user without the proper authorisation.
-	
-	Set root password? [Y/n] Y
-		New password:
-		Re-enter new password:
-		Password updated successfully!
-		Reloading privilege tables..
-		 ... Success!	
-	
-		By default, a MariaDB installation has an anonymous user, allowing anyone
-		to log into MariaDB without having to have a user account created for
-		them.  This is intended only for testing, and to make the installation
-		go a bit smoother.  You should remove them before moving into a
-		production environment.
-	
-	Remove anonymous users? [Y/n] Y
-		 ... Success!
-		
-		Normally, root should only be allowed to connect from 'localhost'.  This
-		ensures that someone cannot guess at the root password from the network.
-	
-	Disallow root login remotely? [Y/n] Y
-		 ... Success!
-		
-		By default, MariaDB comes with a database named 'test' that anyone can
-		access.  This is also intended only for testing, and should be removed
-		before moving into a production environment.
-	
-	Remove test database and access to it? [Y/n] Y
-		 - Dropping test database...
-		 ... Success!
-		 - Removing privileges on test database...
-		 ... Success!
-		
-		Reloading the privilege tables will ensure that all changes made so far
-		will take effect immediately.
-	
-	Reload privilege tables now? [Y/n] Y
-		 ... Success!
-		
-		Cleaning up...
-		
-		All done!  If you've completed all of the above steps, your MariaDB
-		installation should now be secure.
-		
-		Thanks for using MariaDB!
-		
------------------------------------------------------------------------------------------------------------------------
-	3. Message queue
------------------------------------------------------------------------------------------------------------------------
+#-----------------------------------------------------------------------------------------------------------------------
+print_title "3. Message queue"
+#-----------------------------------------------------------------------------------------------------------------------
 
-3.1) 변수
-RABBIT_PASS=openstack
+apt-get install -y rabbitmq-server
 
-# apt-get install -y rabbitmq-server
+rabbitmqctl add_user openstack ${RABBIT_PASS}
+rabbitmqctl set_permissions openstack ".*" ".*" ".*"
 
-openstack 계정 추가 및 권한 설정
+#==================================================================
+print_title "4. Keystone"
+#==================================================================
 
+create_keystone_db() {
+	mysql -u root -p${DB_ADMIN_PASS} -e "CREATE DATABASE keystone;"
+	mysql -u root -p${DB_ADMIN_PASS} -h localhost -e "GRANT ALL PRIVILEGES ON keystone.* TO 'keystone'@'localhost' IDENTIFIED BY '${KEYSTONE_DBPASS}' WITH GRANT OPTION;"
+	mysql -u root -p${DB_ADMIN_PASS} -h localhost -e "GRANT ALL PRIVILEGES ON keystone.* TO 'keystone'@'%' IDENTIFIED BY '${KEYSTONE_DBPASS}' WITH GRANT OPTION;"
+}
 
-
-# rabbitmqctl add_user openstack ${RABBIT_PASS}
-# rabbitmqctl set_permissions openstack ".*" ".*" ".*"
-
-==================================================================
-	4. Keystone
-==================================================================
-
-4.1) 변수
-KEYSTONE_DBPASS=keystone
-ADMIN_TOKEN=admin
-REGION_NAME=RegionOne
-
-4.2) DB 생성
-$ mysql -u root -p
-CREATE DATABASE keystone;
-
-GRANT ALL PRIVILEGES ON keystone.* TO 'keystone'@'localhost' \
-  IDENTIFIED BY '${KEYSTONE_DBPASS}';
-GRANT ALL PRIVILEGES ON keystone.* TO 'keystone'@'%' \
-  IDENTIFIED BY '${KEYSTONE_DBPASS}';
-
-4.3) 설치  
- # echo "manual" > /etc/init/keystone.override
+echo "manual" > /etc/init/keystone.override
  
- # apt-get install -y keystone python-openstackclient apache2 libapache2-mod-wsgi memcached python-memcache
- 
- * /etc/keystone/keystone.conf 파일 수정
- -----------------------------------------------------------------------------------------------------------------------
- [DEFAULT]
+apt-get install -y keystone python-openstackclient apache2 libapache2-mod-wsgi memcached python-memcache
+
+config_keystone() { 
+	echo "*** config_keystone"
+	
+	cat > /etc/keystone/keystone.conf <<EOF
+[DEFAULT]
 admin_token = ${ADMIN_TOKEN}
+verbose = True
 
 [database]
-connection = mysql://keystone:{KEYSTONE_DBPASS}@controller/keystone
+connection = mysql://keystone:${KEYSTONE_DBPASS}@controller/keystone
 
 [memcache]
 servers = localhost:11211
@@ -196,10 +145,9 @@ driver = keystone.token.persistence.backends.memcache.Token
 
 [revoke]
 driver = keystone.contrib.revoke.backends.sql.Revoke
+EOF
 
-[DEFAULT]
-verbose = True
------------------------------------------------------------------------------------------------------------------------
+}
 
 # su -s /bin/sh -c "keystone-manage db_sync" keystone
 

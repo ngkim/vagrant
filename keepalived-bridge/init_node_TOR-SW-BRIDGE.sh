@@ -1,5 +1,6 @@
 #!/bin/bash
 
+
 BR1="br0"
 
 BR1_ITFS=("eth1" "eth2" "eth3" "eth4" "eth5" "eth6" "eth7")
@@ -23,6 +24,9 @@ init_bridge() {
         sudo ifconfig $BR_NAME up
 }
 
+sudo apt-get -y update
+sudo apt-get install -y bridge-utils
+	
 init_bridge $BR1 BR1_ITFS[@]
 
 
