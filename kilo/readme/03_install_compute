@@ -1,0 +1,96 @@
+==================================================================
+	 Add the Compute service @ Controller
+==================================================================
+
+NOVA_DBPASS=nova!234
+NOVA_PASS=nova!234
+REGION_NAME=RegionOne
+RABBIT_PASS=openstack
+METADATA_SECRET=meta!234
+
+# mysql -u root -p
+CREATE DATABASE nova;
+GRANT ALL PRIVILEGES ON nova.* TO 'nova'@'localhost' \
+  IDENTIFIED BY '${NOVA_DBPASS}';
+GRANT ALL PRIVILEGES ON nova.* TO 'nova'@'%' \
+  IDENTIFIED BY '${NOVA_DBPASS}';
+  
+# source admin-openrc.sh
+
+openstack user create --password-prompt nova
+openstack role add --project service --user nova admin
+openstack service create --name nova \
+  --description "OpenStack Compute" compute
+  
+openstack endpoint create \
+  --publicurl http://controller:8774/v2/%\(tenant_id\)s \
+  --internalurl http://controller:8774/v2/%\(tenant_id\)s \
+  --adminurl http://controller:8774/v2/%\(tenant_id\)s \
+  --region ${REGION_NAME} \
+  compute  
+
+
+# apt-get install -y nova-api nova-cert nova-conductor nova-consoleauth \
+  nova-novncproxy nova-scheduler python-novaclient
+
+/etc/nova/nova.conf
+-----------------------------------------------------------------------------------------------------------------------
+[DEFAULT]
+rpc_backend = rabbit
+verbose = True
+auth_strategy = keystone
+my_ip = 10.0.0.11
+vncserver_listen = 10.0.0.11
+vncserver_proxyclient_address = 10.0.0.11
+
+[glance]
+host = controller
+
+[database]
+connection = mysql://nova:${NOVA_DBPASS}@controller/nova
+
+[oslo_concurrency]
+lock_path = /var/lib/nova/tmp
+
+[oslo_messaging_rabbit]
+rabbit_host = controller
+rabbit_userid = openstack
+rabbit_password = ${RABBIT_PASS}
+
+[keystone_authtoken]
+auth_uri = http://controller:5000
+auth_url = http://controller:35357
+auth_plugin = password
+project_domain_id = default
+user_domain_id = default
+project_name = service
+username = nova
+password = ${NOVA_PASS}
+
+[neutron]
+service_metadata_proxy = True
+metadata_proxy_shared_secret = ${METADATA_SECRET}
+-----------------------------------------------------------------------------------------------------------------------
+
+# su -s /bin/sh -c "nova-manage db sync" nova
+
+# service nova-api restart
+# service nova-cert restart
+# service nova-consoleauth restart
+# service nova-scheduler restart
+# service nova-conductor restart
+# service nova-novncproxy restart
+# rm -f /var/lib/nova/nova.sqlite
+
+5.2) verify
+
+echo "export OS_IMAGE_API_VERSION=2" | tee -a admin-openrc.sh
+source admin-openrc.sh
+mkdir /tmp/images
+wget -P /tmp/images http://download.cirros-cloud.net/0.3.4/cirros-0.3.4-x86_64-disk.img
+glance image-create --name "cirros-0.3.4-x86_64" --file /tmp/images/cirros-0.3.4-x86_64-disk.img \
+  --disk-format qcow2 --container-format bare --visibility public --progress
+  
+# glance image-list
+# rm -r /tmp/images
+  

@@ -3,17 +3,20 @@
 
 require "../include/vnode.rb"
 
-openstack  = Node.new("OpenStack" , [1,2,3,5], 8, 4096, -1, 22080, 26080)
-user_node  = Node.new("User"	, [4], 2, 1024, -1)
+openstack  = Node.new("OpenStack" , [1,2,3,4], 8, 4096, 22022, 22080, 26080)
+#user_node  = Node.new("User"	, [4], 2, 1024, -1)
 
-mgmt_sw    = Node.new("MGMT-SW" , (1..2), 2, 2048, -1)
-l3_sw      = Node.new("L3-SW" , (3..4), 2, 2048, -1)
-l2_sw      = Node.new("L2-SW"	, (5..6), 2, 2048, -1)
+#mgmt_sw    = Node.new("MGMT-SW" , (1..2), 2, 2048, -1)
+#l3_sw      = Node.new("L3-SW" , (3..4), 2, 2048, -1)
+#l2_sw      = Node.new("L2-SW"	, (5..6), 2, 2048, -1)
 
 
 # list of nodes and switches
-nodes = [ openstack, user_node ]
-switches = [ l3_sw, l2_sw ]
+nodes = [ openstack ]
+switches = [ ]
+  #nodes = [ openstack, user_node ]
+#switches = [ l3_sw, l2_sw ]
+
 
 # Vagrantfile API/syntax version. Don't touch unless you know what you're doing!
 VAGRANTFILE_API_VERSION = "2"

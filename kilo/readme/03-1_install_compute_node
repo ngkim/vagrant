@@ -1,0 +1,85 @@
+==================================================================
+	 Add the Compute service @ Compute Node
+==================================================================
+
+NOVA_DBPASS=nova!234
+NOVA_PASS=nova!234
+REGION_NAME=RegionOne
+RABBIT_PASS=openstack
+
+# mysql -u root -p
+CREATE DATABASE nova;
+GRANT ALL PRIVILEGES ON nova.* TO 'nova'@'localhost' \
+  IDENTIFIED BY '${NOVA_DBPASS}';
+GRANT ALL PRIVILEGES ON nova.* TO 'nova'@'%' \
+  IDENTIFIED BY '${NOVA_DBPASS}';
+  
+# source admin-openrc.sh
+
+openstack user create --password-prompt nova
+openstack role add --project service --user nova admin
+openstack service create --name nova \
+  --description "OpenStack Compute" compute
+  
+openstack endpoint create \
+  --publicurl http://controller:8774/v2/%\(tenant_id\)s \
+  --internalurl http://controller:8774/v2/%\(tenant_id\)s \
+  --adminurl http://controller:8774/v2/%\(tenant_id\)s \
+  --region RegionOne \
+  compute  
+
+
+# apt-get install -y nova-compute sysfsutils
+
+/etc/nova/nova.conf
+-----------------------------------------------------------------------------------------------------------------------
+[DEFAULT]
+rpc_backend = rabbit
+verbose = True
+auth_strategy = keystone
+
+my_ip = 10.0.0.31
+
+vnc_enabled = True
+vncserver_listen = 0.0.0.0
+vncserver_proxyclient_address = 10.0.0.31
+novncproxy_base_url = http://controller:6080/vnc_auto.html
+
+[glance]
+host = controller
+
+[oslo_concurrency]
+lock_path = /var/lib/nova/tmp
+
+[oslo_messaging_rabbit]
+rabbit_host = controller
+rabbit_userid = openstack
+rabbit_password = ${RABBIT_PASS}
+
+[keystone_authtoken]
+auth_uri = http://controller:5000
+auth_url = http://controller:35357
+auth_plugin = password
+project_domain_id = default
+user_domain_id = default
+project_name = service
+username = nova
+password = ${NOVA_PASS}
+-----------------------------------------------------------------------------------------------------------------------
+
+/etc/nova/nova-compute.conf
+-----------------------------------------------------------------------------------------------------------------------
+[libvirt]
+virt_type = qemu
+-----------------------------------------------------------------------------------------------------------------------
+
+# service nova-compute restart
+# rm -f /var/lib/nova/nova.sqlite
+
+5.2) verify
+
+source admin-openrc.sh
+$ nova service-list
+$ nova endpoints
+$ nova image-list
+  
