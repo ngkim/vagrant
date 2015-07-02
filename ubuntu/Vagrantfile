@@ -15,14 +15,16 @@ require "../include/vnode.rb"
 # TODO: SSH_PORT를 자동으로 생성해주는 함수 필요(base generator를 만들고
 #       alloc_pnat_ssh()를 호출하면 다음 가용한 포트번호 반환
 
+tor_sw      = Node.new("TOR-SW"	,  (1..12),    2, 2048, 31234)
+
 # mgr_node는 NAT 포트 하나로 동작
-web  = Node.new("WEB"	, []    , 8, 4096, -1, -1, -1, "em1", "10.0.0.70")
-was  = Node.new("WAS"	, []    , 8, 4096, -1, -1, -1, "em1", "10.0.0.71")
-db0  = Node.new("DB0"	, []    , 4, 4096, -1, -1, -1, "em1", "10.0.0.72")
+#web  = Node.new("WEB"	, []    , 8, 4096, -1, -1, -1, "em1", "10.0.0.70")
+#was  = Node.new("WAS"	, []    , 8, 4096, -1, -1, -1, "em1", "10.0.0.71")
+#db0  = Node.new("DB0"	, []    , 4, 4096, -1, -1, -1, "em1", "10.0.0.72")
 
 # list of nodes and switches
-switches = [ ]
-nodes    = [ web, was, db0 ]
+switches = [ tor_sw ]
+nodes    = [ ]
 
 ###############################################################################
 # IMPORTANT: use your own link_prefix to avoid duplication error 
@@ -72,12 +74,12 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
         # TODO:
         for i in 2..(interface_count + 1)
           # 스위칭에 이용하는 인터페이스에 대해서 promiscuous mode를 allow vms로 설정해줌
-      v.customize ["modifyvm", :id, "--nicpromisc#{i}", "allow-all"]                      
-    end
-    v.customize ["modifyvm", :id, "--hpet", "on"]
-    #v.gui = true
-    v.memory = memory
-    v.cpus = cpu
+          v.customize ["modifyvm", :id, "--nicpromisc#{i}", "allow-all"]                      
+        end
+        v.customize ["modifyvm", :id, "--hpet", "on"]
+        #v.gui = true
+        v.memory = memory
+        v.cpus = cpu
       end
       cfg_sw.vm.network :forwarded_port, guest: 22, host: "#{ssh_nat_port}", id: "ssh"
     

@@ -1,0 +1,26 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+############################################################
+# Author: Namgon Kim
+# Date: 2015. 04. 01
+#
+# NetFlow를 이용한 Traffic Monitoring
+############################################################
+
+require "../include/vnode.rb"
+require "../include/vagrant.rb"
+
+###############################################################################
+# TODO: 필요시 node에 image setting 함수 추가
+
+nfsen  = Node.new("NFSEN", [] , 2, 4096, -1)
+
+# list of nodes and switches
+switches = [ ]
+nodes    = [ nfsen ]
+
+###############################################################################
+
+vagrant = Vagrant.new()
+vagrant.configure(switches, nodes)
