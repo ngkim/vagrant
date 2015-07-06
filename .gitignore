@@ -1,6 +1,5 @@
 *.box
 .vagrant
-openstack
 adminkey
 *.pyc
 *_bootstrap_file_*
