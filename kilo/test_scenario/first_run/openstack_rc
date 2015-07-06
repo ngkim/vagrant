@@ -1,0 +1,7 @@
+export OS_TENANT_NAME=admin
+export OS_USERNAME=admin
+export OS_PASSWORD=ohhberry3333
+export OS_AUTH_URL=http://10.0.0.101:5000/v2.0/
+export OS_NO_CACHE=1
+export OS_VOLUME_API_VERSION=2
+

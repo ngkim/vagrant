@@ -2,10 +2,6 @@
 	 Add the Compute service @ Compute Node
 ==================================================================
 
-NOVA_DBPASS=nova!234
-NOVA_PASS=nova!234
-REGION_NAME=RegionOne
-RABBIT_PASS=openstack
 
 # mysql -u root -p
 CREATE DATABASE nova;
@@ -18,6 +14,7 @@ GRANT ALL PRIVILEGES ON nova.* TO 'nova'@'%' \
 
 openstack user create --password-prompt nova
 openstack role add --project service --user nova admin
+
 openstack service create --name nova \
   --description "OpenStack Compute" compute
   

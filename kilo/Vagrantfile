@@ -7,10 +7,14 @@ require "../include/vnode.rb"
 * OpenStack Kilo 버전 설치
   - 아무것도 없이 kilo만 설치
   - 스크립트도 필요없이 설치만 해보기
+* OpenStack Node Networking Configuration
+  - eth0: NAT
+  - eth1: MGMT
+  - eth2: EXT
 =end
 
 # Base NAT Port
-BNP=10000
+BNP=1000
 
 nat_map_default = {}
 nat_map_openstack = {"web" => { 80    => BNP+80 }, "novnc" => {6080 => BNP+6080}, "https" => {443 => BNP+443}}
@@ -18,7 +22,7 @@ nat_map_openstack = {"web" => { 80    => BNP+80 }, "novnc" => {6080 => BNP+6080}
 sync_folder_default = {}
 sync_folder_openstack = {}     
 
-openstack   = Node.new("OpenStack"  , [1], 8, 8192, nat_map_openstack, sync_folder_openstack, "Intel(R) Centrino(R) Advanced-N 6235")
+openstack   = Node.new("OpenStack"  , [1], 8, 8192, nat_map_openstack, sync_folder_openstack, "em1")
 mgmt_sw     = Node.new("MGMT-SW"    , (1..6), 2, 2048, nat_map_default, sync_folder_default, "em2")
 
 # list of nodes and switches

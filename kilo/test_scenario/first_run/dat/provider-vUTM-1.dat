@@ -1,0 +1,101 @@
+#!/bin/bash
+
+echo "
+################################################################################
+#
+#   VM :: User Data Action
+#
+################################################################################
+"
+echo "
+# ---------------------------------------------------
+# 0. parameters 
+# ---------------------------------------------------
+#    _nic_grn= eth2
+#    _ip_grn= 192.168.0.1/24
+#    _nic_org= eth3
+#    _ip_org= 211.100.0.1/24
+#    _nic_grn= eth1
+#    _ip_red= 211.196.251.2/30
+# ---------------------------------------------------
+"
+
+echo "
+# ---------------------------------------------------
+# 1. install tools
+# ---------------------------------------------------
+"
+
+apt-get -y update  
+apt-get -y install iperf ifstat sysstat bridge-utils
+
+echo "
+# --------------------------------------------------- 
+# 2. nic activate
+# ---------------------------------------------------
+"
+echo "ifconfig eth2 up"
+ifconfig eth2 up
+echo "ifconfig eth3 up"
+ifconfig eth3 up
+
+echo "
+# --------------------------------------------------- 
+# 3. create bridge br0 & allocate IP
+# ---------------------------------------------------
+"
+echo "brctl addbr br0"
+brctl addbr br0
+echo "brctl addif br0 eth2"
+brctl addif br0 eth2
+
+echo "ifconfig br0 192.168.0.1/24 up"
+ifconfig br0 192.168.0.1/24 up
+
+echo "
+# --------------------------------------------------- 
+# 4. create bridge br1 & allocate IP
+# ---------------------------------------------------
+"
+echo "brctl addbr br1"
+brctl addbr br1
+echo "brctl addif br1 eth3"
+brctl addif br1 eth3
+
+echo "ifconfig br1 211.100.0.1/24 up"
+ifconfig br1 211.100.0.1/24 up
+
+echo "
+# --------------------------------------------------- 
+# 5. configure red interface & apply nat rules
+# ---------------------------------------------------
+"
+echo "ifconfig eth1 211.196.251.2/30 up"
+ifconfig eth1 211.196.251.2/30 up
+
+echo "ip route del default"
+ip route del default
+echo "ip route add default via 211.196.251.1"
+ip route add default via 211.196.251.1
+
+echo "
+# --------------------------------------------------- 
+# 6. enable ip forwarding
+# ---------------------------------------------------
+"
+echo "echo 1 > /proc/sys/net/ipv4/ip_forward"
+echo 1 > /proc/sys/net/ipv4/ip_forward
+
+#iptables -A FORWARD -i br0 -o eth1 -s  -m conntrack --ctstate NEW -j ACCEPT
+#iptables -A FORWARD -m conntrack --ctstate ESTABLISHED,RELATED -j ACCEPT
+#iptables -t nat -F POSTROUTING
+#iptables -t nat -A POSTROUTING -o eth1 -j MASQUERADE
+
+echo "
+################################################################################
+#
+#   End User Data Action
+#
+################################################################################
+"
+
