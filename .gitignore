@@ -1,5 +1,6 @@
 *.box
 .vagrant
+.seed
 adminkey
 *.pyc
 *_bootstrap_file_*

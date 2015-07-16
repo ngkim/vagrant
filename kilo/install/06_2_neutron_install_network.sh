@@ -1,11 +1,9 @@
 #!/bin/bash
 
-source "/vagrant/config/default.cfg"
-source "/vagrant/include/print_util.sh"
-source "/vagrant/include/12_config.sh"
-source "/vagrant/include/openstack/01_identity.sh"
-source "/vagrant/include/openstack/02_endpoint.sh"
-source "/vagrant/include/openstack/03_database.sh"
+source "./00_check_config.sh"
+source "$WORK_HOME/include/openstack/01_identity.sh"
+source "$WORK_HOME/include/openstack/02_endpoint.sh"
+source "$WORK_HOME/include/openstack/03_database.sh"
 
 config_sysctl() {
 	cat >> /etc/sysctl.conf <<EOF

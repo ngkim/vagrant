@@ -1,8 +1,6 @@
 #!/bin/bash
 
-source "/vagrant/config/default.cfg"
-source "/vagrant/include/print_util.sh"
-source "/vagrant/include/12_config.sh"
+source "./00_check_config.sh"
 
 install_repository() {
 	apt-get install -y ubuntu-cloud-keyring crudini
