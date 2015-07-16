@@ -15,6 +15,14 @@ update_repository() {
 	apt-get update && apt-get dist-upgrade -y
 }
 
+copy_deb_from_local_cache() {
+	echo "cp -r /vagrant/archives /var/cache/apt/"
+	cp -r /vagrant/archives /var/cache/apt/
+
+	echo "dpkg -i /var/cache/apt/archives/*.deb"
+	dpkg -i /var/cache/apt/archives/*.deb
+}
+
 install_repository
 config_repository
 update_repository

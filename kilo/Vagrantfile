@@ -17,7 +17,7 @@ require "../include/vnode.rb"
 BNP=1000
 
 nat_map_default = {}
-nat_map_openstack = {"web" => { 80    => BNP+80 }, "novnc" => {6080 => BNP+6080}, "https" => {443 => BNP+443}}
+nat_map_openstack = {"web" => { 80    => BNP+80 }, "mysql" => { 3306    => BNP+3306 }, "novnc" => {6080 => BNP+6080}, "https" => {443 => BNP+443}}
 
 sync_folder_default = {}
 sync_folder_openstack = {}     

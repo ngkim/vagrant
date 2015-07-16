@@ -1,7 +1,6 @@
 #!/bin/bash
 
-source "./ext-net.ini"
-source "../include/command_util.sh"
+source "./00_check_config.sh"
 
 if [ -z ${OS_AUTH_URL+x} ]; then
     source ~/admin-openrc.sh

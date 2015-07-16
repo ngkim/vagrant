@@ -1,11 +1,9 @@
 #!/bin/bash
 
-source "/vagrant/config/default.cfg"
-source "/vagrant/include/print_util.sh"
-source "/vagrant/include/12_config.sh"
-source "/vagrant/include/openstack/01_identity.sh"
-source "/vagrant/include/openstack/02_endpoint.sh"
-source "/vagrant/include/openstack/03_database.sh"
+source "./00_check_config.sh"
+source "$WORK_HOME/include/openstack/01_identity.sh"
+source "$WORK_HOME/include/openstack/02_endpoint.sh"
+source "$WORK_HOME/include/openstack/03_database.sh"
 
 install_heat() {
 	apt-get install -y heat-api heat-api-cfn heat-engine python-heatclient
@@ -40,10 +38,11 @@ config_heat() {
 }
 	
 create_heat_domain() {	
-	heat-keystone-setup-domain \
-	--stack-user-domain-name heat_user_domain \
-	--stack-domain-admin heat_domain_admin \
-	--stack-domain-admin-password ${HEAT_DOMAIN_PASS}
+	local CFG_FILE="/etc/heat/heat.conf"
+	
+	STACK_USER_DOMAIN_ID=`heat-keystone-setup-domain --stack-user-domain-name heat_user_domain --stack-domain-admin heat_domain_admin --stack-domain-admin-password ${HEAT_DOMAIN_PASS} | awk -F "=" '/stack_user_domain_id/{print $2}'`
+	
+	set_config $CFG_FILE DEFAULT stack_user_domain_id ${STACK_USER_DOMAIN_ID}		
 }
 
 db_sync_heat() {

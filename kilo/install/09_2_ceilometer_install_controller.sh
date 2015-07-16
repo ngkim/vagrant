@@ -1,16 +1,16 @@
 #!/bin/bash
 
-source "../config/default.cfg"
-source "../include/print_util.sh"
-source "../include/12_config.sh"
-source "../include/openstack/01_identity.sh"
-source "../include/openstack/02_endpoint.sh"
-source "../include/openstack/03_database.sh"
+source "./00_check_config.sh"
+source "$WORK_HOME/include/openstack/01_identity.sh"
+source "$WORK_HOME/include/openstack/02_endpoint.sh"
+source "$WORK_HOME/include/openstack/03_database.sh"
 
 install_ceilometer() {
 	apt-get install -y ceilometer-api ceilometer-collector ceilometer-agent-central \
 		ceilometer-agent-notification ceilometer-alarm-evaluator ceilometer-alarm-notifier \
-		python-ceilometerclient	
+		python-ceilometerclient	python-pip libpython-dev
+	
+	#pip install --upgrade python-ceilometerclient
 }
 
 config_ceilometer() {
@@ -57,7 +57,7 @@ restart_ceilometer() {
 print_title "CEILOMETER - PREPARE"
 #==================================================================
 
-source $OPENRC
+source $OPENRC_v2
 
 create_user ceilometer ${CEILOMETER_PASS}
 add_user_to_role ceilometer service admin
@@ -69,6 +69,11 @@ create_ceilometer_endpoint
 print_title "CEILOMETER - INSTALL"
 #==================================================================
 
-install_ceilometer
-config_ceilometer
-restart_ceilometer
+cmd="install_ceilometer"
+run_commands $cmd
+
+cmd="config_ceilometer"
+run_commands $cmd
+
+cmd="restart_ceilometer"
+run_commands $cmd

@@ -3,7 +3,7 @@
 source "./00_check_config.sh"
 source "$WORK_HOME/include/openstack/01_identity.sh"
 source "$WORK_HOME/include/openstack/02_endpoint.sh"
-source "$WORK_HOMEt/include/openstack/03_database.sh"
+source "$WORK_HOME/include/openstack/03_database.sh"
 
 install_dashboard() {
 	apt-get install -y openstack-dashboard

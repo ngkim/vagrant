@@ -1,10 +1,6 @@
 #!/bin/bash
 
-source "ext-net.ini"
-source "../config/default.cfg"
-source "../include/print_util.sh"
-source "../include/12_config.sh"
-source "../include/command_util.sh"
+source "./00_check_config.sh"
 
 #==================================================================
 print_title "HEAT - VERIFY"
@@ -12,14 +8,13 @@ print_title "HEAT - VERIFY"
 
 env_setup() {
 	if [ -z ${OS_AUTH_URL+x} ]; then
-    	source $OPENRC
+    		source $OPENRC
 	fi
 }
 
 config_test_stack() {
-	
-	cat > $TEST_STACK << EOF		
-	heat_template_version: 2014-10-16
+echo "
+heat_template_version: 2014-10-16
 description: A simple server.
  
 parameters:
@@ -42,9 +37,8 @@ resources:
 outputs:
   private_ip:
     description: IP address of the server in the private network
-    value: { get_attr: [ server, first_address ] }
-EOF    
-    
+    value: { get_attr: [ server, first_address ] }" > $TEST_STACK	
+	
 }
 
 create_test_stack() {
