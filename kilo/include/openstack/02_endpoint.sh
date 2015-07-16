@@ -53,3 +53,45 @@ create_neutron_endpoint() {
 	  --region ${REGION_NAME} \
 	  network
 }
+
+create_heat_service() {
+	openstack service create \
+		--name heat --description "Orchestration" orchestration
+}
+
+create_heat_cfn_service() {
+	openstack service create --name heat-cfn \
+		--description "Orchestration"  cloudformation
+}
+ 
+create_heat_orchestration_endpoint() { 
+	openstack endpoint create \
+	--publicurl http://controller:8004/v1/%\(tenant_id\)s \
+	--internalurl http://controller:8004/v1/%\(tenant_id\)s \
+	--adminurl http://controller:8004/v1/%\(tenant_id\)s \
+	--region ${REGION_NAME} \
+	orchestration
+}
+
+create_heat_cfn_endpoint() { 
+	openstack endpoint create \
+	--publicurl http://controller:8000/v1 \
+	--internalurl http://controller:8000/v1 \
+	--adminurl http://controller:8000/v1 \
+	--region ${REGION_NAME} \
+	cloudformation
+}
+
+create_ceilometer_service() {
+	openstack service create --name ceilometer \
+	--description "Telemetry" metering
+}
+
+create_ceilometer_endpoint() {
+	openstack endpoint create \
+	--publicurl http://controller:8777 \
+	--internalurl http://controller:8777 \
+	--adminurl http://controller:8777 \
+	--region RegionOne \
+	metering
+}
