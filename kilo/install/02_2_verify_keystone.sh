@@ -32,6 +32,14 @@ print_title "KEYSTONE Create OpenStack client environment scripts"
 create_openstack_rc() {
 	
 	cat > $OPENRC <<EOF
+unset OS_PROJECT_DOMAIN_ID
+unset OS_USER_DOMAIN_ID
+unset OS_PROJECT_NAME
+unset OS_TENANT_NAME
+unset OS_USERNAME
+unset OS_PASSWORD
+unset OS_AUTH_URL
+
 export OS_PROJECT_DOMAIN_ID=default
 export OS_USER_DOMAIN_ID=default
 export OS_PROJECT_NAME=admin
@@ -45,6 +53,14 @@ EOF
 # use it for ceilometer
 
 	cat > $OPENRC_v2 <<EOF
+unset OS_PROJECT_DOMAIN_ID
+unset OS_USER_DOMAIN_ID
+unset OS_PROJECT_NAME
+unset OS_TENANT_NAME
+unset OS_USERNAME
+unset OS_PASSWORD
+unset OS_AUTH_URL
+	
 export OS_PROJECT_DOMAIN_ID=default
 export OS_USER_DOMAIN_ID=default
 export OS_PROJECT_NAME=admin

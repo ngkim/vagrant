@@ -8,9 +8,13 @@ source "$WORK_HOME/include/openstack/03_database.sh"
 install_ceilometer() {
 	apt-get install -y ceilometer-api ceilometer-collector ceilometer-agent-central \
 		ceilometer-agent-notification ceilometer-alarm-evaluator ceilometer-alarm-notifier \
-		python-ceilometerclient	python-pip libpython-dev
+		python-pip libpython-dev
 	
-	#pip install --upgrade python-ceilometerclient
+	# install 	python-ceilometerclient with pip and use version 1.0.14
+	# https://launchpad.net/python-ceilometerclient/+series
+	# version 1.3.0 is for liberty 
+	# apt-get install -y python-ceilometerclient	
+	pip install python-ceilometerclient==1.0.14
 }
 
 config_ceilometer() {
