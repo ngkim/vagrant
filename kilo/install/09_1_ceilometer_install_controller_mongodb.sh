@@ -19,10 +19,9 @@ stop_and_start_mongodb() {
 }
 
 create_ceilometer_db() {
-	mongo --host controller --eval 'db = db.getSiblingDB("ceilometer");db.addUser({user: "ceilometer", pwd: "${CEILOMETER_DBPASS}", roles: [ "readWrite", "dbAdmin" ]})'
+	mongo --host controller --eval 'db = db.getSiblingDB("ceilometer");db.addUser({user: "ceilometer", pwd: "'${CEILOMETER_DBPASS}'", roles: [ "readWrite", "dbAdmin" ]})'
 	RESULT=$?
 	
-	#mongo --host controller --eval 'db = db.getSiblingDB("ceilometer");db.addUser({user: "ceilometer", pwd: "ceilometer1234", roles: [ "readWrite", "dbAdmin" ]})'
 }
 
 restart_mongodb() {
