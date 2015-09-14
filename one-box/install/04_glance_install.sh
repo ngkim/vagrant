@@ -12,6 +12,8 @@ install_glance() {
 config_glance_api() {
 	set_config /etc/glance/glance-api.conf DEFAULT notification_driver noop 
 	set_config /etc/glance/glance-api.conf DEFAULT verbose True
+        set_config /etc/glance/glance-api.conf DEFAULT use_syslog True
+        set_config /etc/glance/glance-api.conf DEFAULT syslog_log_facility LOG_LOCAL1
 	
 	set_config /etc/glance/glance-api.conf database connection mysql://glance:${GLANCE_DBPASS}@controller/glance
 	
@@ -33,6 +35,8 @@ config_glance_api() {
 config_glance_registry() {
 	set_config /etc/glance/glance-registry.conf DEFAULT notification_driver noop
 	set_config /etc/glance/glance-registry.conf DEFAULT verbose True
+	set_config /etc/glance/glance-registry.conf DEFAULT use_syslog True
+	set_config /etc/glance/glance-registry.conf DEFAULT syslog_log_facility LOG_LOCAL1
 	
 	set_config /etc/glance/glance-registry.conf database connection mysql://glance:${GLANCE_DBPASS}@controller/glance
 	

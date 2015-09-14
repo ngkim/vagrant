@@ -12,6 +12,8 @@ install_nova() {
 config_nova() {
 	set_config /etc/nova/nova.conf DEFAULT rpc_backend rabbit
 	set_config /etc/nova/nova.conf DEFAULT verbose True
+	set_config /etc/nova/nova.conf DEFAULT use_syslog True
+	set_config /etc/nova/nova.conf DEFAULT syslog_log_facility LOG_LOCAL0
 	set_config /etc/nova/nova.conf DEFAULT auth_strategy keystone
 	
 	set_config /etc/nova/nova.conf DEFAULT my_ip ${CTRL_MGMT_IP}

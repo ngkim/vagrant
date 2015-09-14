@@ -22,6 +22,8 @@ install_neutron() {
 
 config_neutron() {
 	set_config /etc/neutron/neutron.conf DEFAULT verbose True
+	set_config /etc/neutron/neutron.conf DEFAULT use_syslog True
+	set_config /etc/neutron/neutron.conf DEFAULT syslog_log_facility LOG_LOCAL4
 	set_config /etc/neutron/neutron.conf DEFAULT rpc_backend rabbit
 	set_config /etc/neutron/neutron.conf DEFAULT auth_strategy keystone
 

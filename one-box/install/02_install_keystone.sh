@@ -16,6 +16,8 @@ install_keystone() {
 config_keystone() { 
 	set_config /etc/keystone/keystone.conf DEFAULT admin_token ${ADMIN_TOKEN} 
 	set_config /etc/keystone/keystone.conf DEFAULT verbose True
+	set_config /etc/keystone/keystone.conf DEFAULT use_syslog True
+	set_config /etc/keystone/keystone.conf DEFAULT syslog_log_facility LOG_LOCAL3
 	
 	set_config /etc/keystone/keystone.conf database connection mysql://keystone:${KEYSTONE_DBPASS}@controller/keystone
 
