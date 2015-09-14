@@ -1,0 +1,127 @@
+==================================================================
+	 Add the Networking service @ Network Node
+==================================================================
+
+NEUTRON_DBPASS=neutron!234
+NEUTRON_PASS=neutron!234
+REGION_NAME=RegionOne
+RABBIT_PASS=openstack
+NOVA_PASS=nova!234
+METADATA_SECRET=meta!234
+EXTERNAL_INTERFACE=em4
+
+* /etc/sysctl.conf
+-----------------------------------------------------------------------------------------------------------------------
+net.ipv4.ip_forward=1
+net.ipv4.conf.all.rp_filter=0
+net.ipv4.conf.default.rp_filter=0
+-----------------------------------------------------------------------------------------------------------------------
+
+# sysctl -p
+
+# apt-get install -y neutron-plugin-ml2 neutron-plugin-openvswitch-agent \
+  neutron-l3-agent neutron-dhcp-agent neutron-metadata-agent
+
+/etc/neutron/neutron.conf
+-----------------------------------------------------------------------------------------------------------------------
+[DEFAULT]
+verbose = True
+
+rpc_backend = rabbit
+auth_strategy = keystone
+
+core_plugin = ml2
+service_plugins = router
+allow_overlapping_ips = True
+
+[oslo_messaging_rabbit]
+rabbit_host = controller
+rabbit_userid = openstack
+rabbit_password = ${RABBIT_PASS}
+
+[keystone_authtoken]
+auth_uri = http://controller:5000
+auth_url = http://controller:35357
+auth_plugin = password
+project_domain_id = default
+user_domain_id = default
+project_name = service
+username = nova
+password = ${NEUTRON_PASS}
+
+-----------------------------------------------------------------------------------------------------------------------
+
+/etc/neutron/plugins/ml2/ml2_conf.ini 
+-----------------------------------------------------------------------------------------------------------------------
+[ml2]
+type_drivers = flat,vlan,gre,vxlan
+tenant_network_types = gre
+mechanism_drivers = openvswitch
+
+[ml2_type_gre]
+tunnel_id_ranges = 1:1000
+
+[securitygroup]
+enable_security_group = True
+enable_ipset = True
+firewall_driver = neutron.agent.linux.iptables_firewall.OVSHybridIptablesFirewallDriver
+
+[ovs]
+local_ip = 10.0.0.31
+bridge_mappings = external:br-ex
+
+[agent]
+tunnel_types = gre
+-----------------------------------------------------------------------------------------------------------------------
+
+/etc/neutron/l3_agent.ini
+-----------------------------------------------------------------------------------------------------------------------
+[DEFAULT]
+interface_driver = neutron.agent.linux.interface.OVSInterfaceDriver
+external_network_bridge =
+router_delete_namespaces = True
+
+verbose = True
+-----------------------------------------------------------------------------------------------------------------------
+
+/etc/neutron/dhcp_agent.ini
+-----------------------------------------------------------------------------------------------------------------------
+[DEFAULT]
+interface_driver = neutron.agent.linux.interface.OVSInterfaceDriver
+dhcp_driver = neutron.agent.linux.dhcp.Dnsmasq
+dhcp_delete_namespaces = True
+
+verbose = True
+-----------------------------------------------------------------------------------------------------------------------
+
+/etc/neutron/metadata_agent.ini
+-----------------------------------------------------------------------------------------------------------------------
+[DEFAULT]
+auth_uri = http://controller:5000
+auth_url = http://controller:35357
+auth_region = ${REGION_NAME}
+auth_plugin = password
+project_domain_id = default
+user_domain_id = default
+project_name = service
+username = neutron
+password = ${NEUTRON_PASS}
+
+nova_metadata_ip = controller
+metadata_proxy_shared_secret = ${METADATA_SECRET}
+
+verbose = True
+-----------------------------------------------------------------------------------------------------------------------
+
+# service openvswitch-switch restart
+# ovs-vsctl add-br br-ex
+# ovs-vsctl add-port br-ex ${EXTERNAL_INTERFACE}
+
+# service neutron-plugin-openvswitch-agent restart
+# service neutron-l3-agent restart
+# service neutron-dhcp-agent restart
+# service neutron-metadata-agent restart
+
+Verification
+# source admin-openrc.sh
+# neutron agent-list
