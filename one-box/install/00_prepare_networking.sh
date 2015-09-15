@@ -13,15 +13,13 @@ auto lo
 iface lo inet loopback
 
 # The primary network interface
-auto em1
+auto $PUBLIC_NIC
 iface em1 inet static
-        address 211.224.204.205
-        netmask 255.255.255.128
-        network 211.224.204.128
-        broadcast 211.224.204.255
-        gateway 211.224.204.129
+        address $PUBLIC_IP
+        netmask $PUBLIC_SUBNET
+        gateway $PUBLIC_GW
         # dns-* options are implemented by the resolvconf package, if installed
-        dns-nameservers 8.8.8.8
+        dns-nameservers $PUBLIC_DNS
 
 source /etc/network/interfaces.d/*.cfg
 EOF

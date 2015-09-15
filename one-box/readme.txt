@@ -6,3 +6,6 @@ INSTALL에서 verify시에 에러가 확인되면 설치 프로세스를 멈추�
 	if [ $? -ne 0 ]; then
 	fi 
 -
+
+TODO
+- need to show summary on important information before start installation
