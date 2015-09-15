@@ -6,6 +6,8 @@ init_network_interfaces() {
 	# ------------------------------------------------------------------------------
 	print_title "/etc/network/interfaces"
 	# ------------------------------------------------------------------------------
+
+        apt-get install -y bridge-utils
 	
 	cat > /etc/network/interfaces<<EOF
 # The loopback network interface
