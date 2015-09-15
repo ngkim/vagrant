@@ -1,11 +1,11 @@
 #!/bin/bash
 
 run() {
-#	./00_prepare_networking.sh
+	./00_prepare_networking.sh
 	
-#	./00_prepare_repository.sh
+	./00_prepare_repository.sh
 	
-#	./01_install_database.sh
+	./01_install_database.sh
 	
 	./01_install_msgQ.sh
 	

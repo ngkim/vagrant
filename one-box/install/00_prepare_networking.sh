@@ -12,6 +12,17 @@ init_network_interfaces() {
 auto lo
 iface lo inet loopback
 
+# The primary network interface
+auto em1
+iface em1 inet static
+        address 211.224.204.205
+        netmask 255.255.255.128
+        network 211.224.204.128
+        broadcast 211.224.204.255
+        gateway 211.224.204.129
+        # dns-* options are implemented by the resolvconf package, if installed
+        dns-nameservers 8.8.8.8
+
 source /etc/network/interfaces.d/*.cfg
 EOF
 }
@@ -57,7 +68,7 @@ config_hosts() {
 	
 	cat > /etc/hosts <<EOF
 127.0.0.1 localhost
-${CTRL_MGMT_IP} controller
+${CTRL_MGMT_IP} controller $HOSTNAME
 EOF
 
 }
