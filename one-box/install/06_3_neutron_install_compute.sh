@@ -56,7 +56,8 @@ config_neutron_ml2() {
 	set_config /etc/neutron/plugins/ml2/ml2_conf.ini ovs integration_bridge br-int
 	set_config /etc/neutron/plugins/ml2/ml2_conf.ini ovs bridge_mappings ${BRIDGE_MAPPINGS}
 
-	set_config /etc/neutron/plugins/ml2/ml2_conf.ini securitygroup firewall_driver neutron.agent.linux.iptables_firewall.OVSHybridIptablesFirewallDriver
+	#set_config /etc/neutron/plugins/ml2/ml2_conf.ini securitygroup firewall_driver neutron.agent.linux.iptables_firewall.OVSHybridIptablesFirewallDriver
+        set_config /etc/neutron/plugins/ml2/ml2_conf.ini securitygroup firewall_driver neutron.agent.firewall.NoopFirewallDriver
 	set_config /etc/neutron/plugins/ml2/ml2_conf.ini securitygroup enable_security_group True
 	set_config /etc/neutron/plugins/ml2/ml2_conf.ini securitygroup enable_ipset True
 }

@@ -7,7 +7,7 @@ if [ -z ${OS_AUTH_URL+x} ]; then
 fi
 
 cmd="neutron net-create $BLU_NET"
-#run_commands $cmd
+run_commands $cmd
 
 cmd="neutron subnet-create $BLU_NET --name $BLU_SBNET \
                 --no-gateway

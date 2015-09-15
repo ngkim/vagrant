@@ -63,15 +63,21 @@ do_nova_boot() {
     run_commands_return $cmd
     local IMAGE_ID=$RET
 
+    cmd_nic1="--nic net-id=$MGMT_NET_ID \
+        --nic port-id=$RED_PORT_ID \
+        --nic port-id=$GRN_PORT_ID \
+        --nic port-id=$ORG_PORT_ID \
+        --nic net-id=$BLU_NET_ID"
+ 
+    cmd_nic="--nic net-id=$MGMT_NET_ID \
+        --nic port-id=$RED_PORT_ID \
+        --nic net-id=$BLU_NET_ID"
+ 
     cmd="nova boot $_VM_NAME \
         --flavor 3 \
         --key-name $ACCESS_KEY \
         --image $IMAGE_ID \
-        --nic net-id=$MGMT_NET_ID \
-        --nic port-id=$RED_PORT_ID \
-        --nic port-id=$GRN_PORT_ID \
-        --nic port-id=$ORG_PORT_ID \
-        --nic net-id=$BLU_NET_ID \
+        $cmd_nic \
         --availability-zone $AV_ZONE \
         --security-groups default"
 
