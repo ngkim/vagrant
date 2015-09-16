@@ -71,6 +71,8 @@ do_nova_boot() {
  
     cmd_nic="--nic net-id=$MGMT_NET_ID \
         --nic port-id=$RED_PORT_ID \
+        --nic port-id=$GRN_PORT_ID \
+        --nic port-id=$ORG_PORT_ID \
         --nic net-id=$BLU_NET_ID"
  
     cmd="nova boot $_VM_NAME \

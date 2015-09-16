@@ -1,25 +1,27 @@
 #!/bin/bash
 
 run() {
-	./00_prepare_networking.sh
+	./00_1_prepare_networking.sh
 	
-	./00_prepare_repository.sh
+	./00_2_prepare_repository.sh
 	
-	./01_install_database.sh
+	./01_1_install_database.sh
 	
-	./01_install_msgQ.sh
+	./01_2_install_msgQ.sh
 	
-	./01_install_ntp.sh
+	./01_3_install_ntp.sh
+
+        ./01_4_install_rsyslog.sh
 	
-	./02_install_keystone.sh
+	./02_1_install_keystone.sh
 	
 	./02_1_install_keystone_api_endpoint.sh
 	
 	./02_2_verify_keystone.sh
 	
-	./04_glance_install.sh
+	./04_1_glance_install.sh
 	
-	./04_glance_verify.sh
+	./04_2_glance_verify.sh
 	
 	./05_1_nova_install_controller.sh
 	

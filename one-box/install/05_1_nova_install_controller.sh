@@ -21,7 +21,10 @@ config_nova() {
 	set_config /etc/nova/nova.conf DEFAULT vnc_enabled True
 	set_config /etc/nova/nova.conf DEFAULT vncserver_listen 0.0.0.0
 	set_config /etc/nova/nova.conf DEFAULT vncserver_proxyclient_address ${CTRL_MGMT_IP}
-	set_config /etc/nova/nova.conf DEFAULT novncproxy_base_url http://controller:6080/vnc_auto.html
+	set_config /etc/nova/nova.conf DEFAULT novncproxy_base_url http://${PUBLIC_IP}:6080/vnc_auto.html
+
+	set_config /etc/nova/nova.conf DEFAULT vif_plugging_is_fatal False
+	set_config /etc/nova/nova.conf DEFAULT vif_plugging_timeout 0
 	
 	set_config /etc/nova/nova.conf database connection mysql://nova:${NOVA_DBPASS}@controller/nova
 	
