@@ -20,14 +20,6 @@ print_title "PROVIDER_NET: ORANGE"
 create_provider_net     $ORG_NET $ORG_PHYSNET   $ORG_VLAN
 create_provider_subnet  $ORG_NET $ORG_SBNET     $ORG_NETWORK_CIDR
 
-#==================================================================
-print_title "PROVIDER_NET: RED"
-#==================================================================
-create_provider_net     $RED_NET $RED_PHYSNET   $RED_VLAN
-create_provider_subnet  $RED_NET $RED_SBNET     $RED_NETWORK_CIDR
-
-
-
 
 
 

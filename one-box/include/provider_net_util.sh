@@ -56,6 +56,19 @@ create_provider_net() {
 	run_commands $cmd
 }
 
+create_flat_net() {
+    NET_NAME=$1
+    PHYSNET_NAME=$2
+
+    delete_provider_net $NET_NAME
+	
+    cmd="neutron net-create $NET_NAME \
+           --provider:network_type flat \
+	   --provider:physical_network $PHYSNET_NAME"
+		
+    run_commands $cmd
+}
+
 create_provider_net_shared() {
     NET_NAME=$1
     PHYSNET_NAME=$2
