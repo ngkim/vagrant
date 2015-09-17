@@ -1,0 +1,40 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+require "../include/vnode.rb"
+
+=begin
+* Jenkins를 이용한 협업 환경 구축 (redmine + jenkins + gitlab)
+  - redmine을 이용한 티켓 발행
+  - gitlab을 이용한 소스코드 관리
+  - jenkins를 이용한 자동 컴파일 및 테스트
+* Jenkins 설치
+  - https://wiki.jenkins-ci.org/display/JENKINS/Installing+Jenkins+on+Ubuntu
+* Jenkins + Gitlab
+  - gitlab-plugin 설치 필요
+  - https://github.com/jenkinsci/gitlab-plugin
+=end
+
+# Base NAT Port
+BNP=1001
+
+nat_map_default = {}
+nat_map_jenkins = {"web" => { 8080    => BNP+8080 }}
+
+sync_folder_default = {}
+sync_folder_jenkins = {}
+
+jenkins   = Node.new("JENKINS"  , [1], 2, 2048, nat_map_jenkins, sync_folder_jenkins)
+redmine   = Node.new("REDMINE"  , [1], 2, 2048, nat_map_default, sync_folder_default)
+
+# list of nodes and switches
+nodes     = [ jenkins ]
+switches  = []  
+
+# Vagrantfile API/syntax version. Don't touch unless you know what you're doing!
+VAGRANTFILE_API_VERSION = "2"
+
+Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
+  create_switches(switches, config)
+  create_nodes(nodes, config)  
+end
