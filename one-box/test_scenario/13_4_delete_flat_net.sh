@@ -13,4 +13,10 @@ print_title "DELETE PROVIDER_NET FLAT: RED"
 delete_subnet $RED_SBNET
 delete_net $RED_NET
 
+#==================================================================
+print_title "DELETE PROVIDER_NET: GREEN"
+#==================================================================
+delete_subnet $GRN_SBNET
+delete_net $GRN_NET
+
 

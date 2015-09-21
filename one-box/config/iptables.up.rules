@@ -57,12 +57,17 @@ COMMIT
 -A tcp_attack -m state --state INVALID -j DROP
 -A filter_hackers -s 0.0.0.0/0 -i em1 -j log_deny
 -A allowed_sites -s 127.0.0.1/32 -d 127.0.0.1/32 -i lo -j ACCEPT
+-A allowed_sites -s 8.8.8.8/32 -j ACCEPT
 -A allowed_sites -s 10.0.0.0/24 -j ACCEPT
--A allowed_sites -s 211.224.204.128/25 -i em1 -j ACCEPT
+-A allowed_sites -s 14.52.102.0/24 -j ACCEPT
+-A allowed_sites -s 39.7.53.0/24 -j ACCEPT
+-A allowed_sites -s 211.224.204.128/25 -j ACCEPT
 -A allowed_sites -s 103.246.57.0/24 -i em1 -j ACCEPT
 -A allowed_sites -s 103.246.57.0/24 -i em1 -j ACCEPT
 -A allowed_sites -s 110.68.0.0/14 -i em1 -j ACCEPT
+-A allowed_sites -s 118.33.113.9/32 -i em1 -j ACCEPT
 -A allowed_sites -s 147.6.1.0/24 -i em1 -j ACCEPT
+-A allowed_sites -s 192.168.0.0/24 -j ACCEPT
 -A allowed_sites -s 121.134.209.128/25 -i em1 -j ACCEPT
 -A allowed_sites -s 121.188.105.128/25 -i em1 -j ACCEPT
 -A allowed_sites -s 125.138.98.0/24 -i em1 -j ACCEPT
@@ -76,6 +81,7 @@ COMMIT
 -A allowed_sites -s 218.144.90.0/24 -i em1 -j ACCEPT
 -A allowed_sites -s 220.123.31.0/24 -i em1 -j ACCEPT
 -A allowed_sites -s 222.112.0.0/13 -i em1 -j ACCEPT
+-A allowed_sites -s 222.118.131.0/24 -j ACCEPT
 -A allowed_sites -s 222.118.0.0/16 -i em1 -j ACCEPT
 -A allowed_sites -s 220.123.122.0/24 -i em1 -j ACCEPT
 -A allowed_sites -s 221.151.188.0/24 -i em1 -j ACCEPT
@@ -85,7 +91,7 @@ COMMIT
 -A allowed_sites -s 172.16.0.0/16 -j ACCEPT
 -A allowed_sites -s 183.107.106.204/32 -j ACCEPT
 -A allowed_sites -s 223.33.160.0/24 -j ACCEPT
--A allowed_sites -s 14.52.102.0/24 -j ACCEPT
+-A allowed_sites -p udp --dport 67:68 -j ACCEPT
 -A allowed_sites -m conntrack -i em1 -j log_allow  --ctstate RELATED,ESTABLISHED
 COMMIT
 # Completed on Wed Mar 18 11:00:30 2015
