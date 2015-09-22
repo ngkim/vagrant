@@ -7,6 +7,7 @@ source "../include/print_util.sh"
 ####################################################
 SV_ADDR="211.224.204.202"
 DB_PASS="ohhberry3333"
+ZAGENT_HOST="OneBox01"
 #---------------------------------------------------
 ZAB_AGENTD_CFG="/etc/zabbix/zabbix_agentd.conf"
 ####################################################
@@ -25,6 +26,8 @@ sudo apt-get install -y zabbix-agent
 print_msg "3. configure zabbix-agentd"
 ####################################################
 sed -i "s/Server=127.0.0.1/Server=${SV_ADDR}/g" $ZAB_AGENTD_CFG
+sed -i "s/ServerActive=/ServerActive=${SV_ADDR}/g" $ZAB_AGENTD_CFG
+sed -i "s/Hostname=/Hostname=${ZAGENT_HOST}/g" $ZAB_AGENTD_CFG
 #sudo nano $ZAB_AGENTD_CFG
 
 ####################################################
