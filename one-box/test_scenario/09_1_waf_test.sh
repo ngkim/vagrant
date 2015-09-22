@@ -3,7 +3,7 @@
 source "./00_check_config.sh"
 
 NS=`ip netns | grep qrouter`
-WAF_IP="192.168.10.20"
+WAF_IP="192.168.10.38"
 DEBUG=1
 
 debug_msg() {
@@ -33,7 +33,7 @@ waf_put_call() {
 	curl --insecure \
 		-b $KEY \
 		-H "Content-Type:application/x-www-form-urlencoded" \
-		-d '{"management_route":[{"nic":"eth0","gateway":"192.168.10.26","netmask":"0.0.0.0","dest_ip":"0.0.0.0"},{"nic":"eth0","gateway":"0.0.0.0","netmask":"255.255.255.0","dest_ip":"192.168.10.0"}]}' -vX PUT https://${WAF_IP}/webapi/conf/management_route 2> /dev/null
+		-d '{"management_route":[{"nic":"eth0","gateway":"192.168.10.39","netmask":"0.0.0.0","dest_ip":"0.0.0.0"},{"nic":"eth0","gateway":"0.0.0.0","netmask":"255.255.255.0","dest_ip":"192.168.10.0"}]}' -vX PUT https://${WAF_IP}/webapi/conf/management_route 2> /dev/null
 }
 
 show_interfaces() {
@@ -69,7 +69,7 @@ get_session_id
 #show_traffic
 #echo ""
 
-waf_put_call 
+#waf_put_call 
 
 show_management_route
 

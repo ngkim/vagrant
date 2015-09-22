@@ -2,7 +2,7 @@
 
 source "./00_check_config.sh"
 
-TEST_UTM="root@192.168.10.28"
+TEST_UTM="root@192.168.10.39"
 
 ip_cmd() {
   cmd="ip netns exec `ip netns | grep qrouter` $*"
@@ -96,14 +96,14 @@ config_ethernet() {
 
   print_title "*** Run update: $SCRIPT"
   ip_cmd ssh -oStrictHostKeyChecking=no ${TEST_UTM} $SCRIPT \
-				192.168.0.254 \
+				192.168.0.252 \
                                 192.168.0.255 \
-                                192.168.0.254/24 \
+                                192.168.0.252/24 \
                                 192.168.0.0 \
-				192.168.1.254 \
+				192.168.1.252 \
                                 192.168.1.255 \
                                 24 \
-                                192.168.1.254/24 \
+                                192.168.1.252/24 \
                                 192.168.1.0 \
                                 255.255.255.0
 
@@ -120,5 +120,5 @@ print_title "*** make config scripts executable"
 ip_cmd ssh -oStrictHostKeyChecking=no ${TEST_UTM} chmod +x utm_config/*.sh
 
 config_uplink
-config_dhcp
+#config_dhcp
 config_ethernet
