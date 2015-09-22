@@ -1,0 +1,37 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+require "../include/vnode.rb"
+
+=begin
+* Nagios를 이용한 CPU, NIC monitoring 환경 구성
+  - 2개의 VM (1 for Nagios Core, 1 for Nagios Plugin)
+  - Management Network로 서로 연결됨
+=end
+
+# Base NAT Port
+BNP=2020
+
+nat_map_default = {}
+nat_map_nagios = {"web" => { 80    => BNP+80 }}
+nat_map_nagios1 = {"web" => { 80    => BNP+190 }}
+
+sync_folder_default = {}
+sync_folder_nagios = {}
+
+core     = Node.new("NCore"  , [1], 2, 2048, nat_map_nagios, sync_folder_nagios)
+plugin   = Node.new("NPlugin"  , [2], 2, 2048, nat_map_nagios1, sync_folder_default)
+
+mgmt_sw  = Node.new("MGMT-SW" ,  (1..7), 2, 2048, nat_map_default, sync_folder_default)
+
+# list of nodes and switches
+nodes     = [ core, plugin ]
+switches  = [ mgmt_sw ]   
+
+# Vagrantfile API/syntax version. Don't touch unless you know what you're doing!
+VAGRANTFILE_API_VERSION = "2"
+
+Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
+  create_switches(switches, config)
+  create_nodes(nodes, config)  
+end

@@ -1,0 +1,37 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+require "../include/vnode.rb"
+
+=begin
+* Zabbix를 이용한 CPU, NIC monitoring 환경 구성
+  - 2개의 VM (1 for Zabbix Server, 1 for Zabbix Client)
+  - Management Network로 서로 연결됨
+=end
+
+# Base NAT Port
+BNP=2050
+
+nat_map_default = {}
+nat_map_zs = {"web" => { 80    => BNP+80 }}
+nat_map_zc = {"web" => { 80    => BNP+190 }}
+
+sync_folder_default = {}
+sync_folder_z = {}
+
+server   = Node.new("ZServer"  , [1], 2, 2048, nat_map_zs, sync_folder_z)
+client   = Node.new("ZClient"  , [2], 2, 2048, nat_map_zc, sync_folder_default)
+
+mgmt_sw  = Node.new("MGMT-SW" ,  (1..7), 2, 2048, nat_map_default, sync_folder_default)
+
+# list of nodes and switches
+nodes     = [ server, client ]
+switches  = [ mgmt_sw ]   
+
+# Vagrantfile API/syntax version. Don't touch unless you know what you're doing!
+VAGRANTFILE_API_VERSION = "2"
+
+Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
+  create_switches(switches, config)
+  create_nodes(nodes, config)  
+end
