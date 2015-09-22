@@ -24,7 +24,7 @@ lineBuilder "DNS1" $2
 lineBuilder "DNS2" $3
 echo "ENABLED=on" >> $SettingsFile
 echo "MAC=" >> $SettingsFile
-echo "MANAGED=" >> $SettingsFile
+echo "MANAGED=on" >> $SettingsFile
 echo "MTU=" >> $SettingsFile
 echo "ONBOOT=on" >> $SettingsFile
 lineBuilder "RED_ADDRESS" $4

@@ -7,10 +7,4 @@ if [ -z ${OS_AUTH_URL+x} ]; then
     source ~/admin-openrc.sh
 fi
 
-#==================================================================
-print_title "DELETE PROVIDER_NET: ORANGE"
-#==================================================================
-delete_subnet $ORG_SBNET
-delete_net $ORG_NET
-
 

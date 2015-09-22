@@ -1,11 +1,11 @@
 #!/bin/bash
 
-source "include/print_util.sh"
+source "../include/print_util.sh"
 
 ####################################################
 # configurations 
 ####################################################
-SV_ADDR="211.224.204.202/24"
+SV_ADDR="211.224.204.202"
 DB_PASS="ohhberry3333"
 #---------------------------------------------------
 ZAB_AGENTD_CFG="/etc/zabbix/zabbix_agentd.conf"
@@ -14,17 +14,12 @@ ZAB_AGENTD_CFG="/etc/zabbix/zabbix_agentd.conf"
 ####################################################
 # functions
 ####################################################
-list_archives() {
-}
-
-####################################################
 
 ####################################################
 print_msg "2. install zabbix-agent"
 ####################################################
 sudo apt-get update
 sudo apt-get install -y zabbix-agent
-list_archives STEP1
 
 ####################################################
 print_msg "3. configure zabbix-agentd"

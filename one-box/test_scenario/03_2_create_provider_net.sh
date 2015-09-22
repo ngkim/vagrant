@@ -8,12 +8,4 @@ fi
 
 source "$WORK_HOME/include/provider_net_util.sh"
 
-#==================================================================
-print_title "PROVIDER_NET: ORANGE"
-#==================================================================
-create_provider_net     $ORG_NET $ORG_PHYSNET   $ORG_VLAN
-create_provider_subnet  $ORG_NET $ORG_SBNET     $ORG_NETWORK_CIDR
-
-
-
 
