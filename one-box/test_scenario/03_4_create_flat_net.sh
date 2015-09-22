@@ -14,3 +14,10 @@ print_title "PROVIDER_NET: RED"
 create_flat_net $RED_NET $RED_PHYSNET
 create_provider_subnet   $RED_NET $RED_SBNET $RED_NETWORK_CIDR
 
+#==================================================================
+print_title "PROVIDER_NET: GREEN"
+#==================================================================
+create_flat_net     $GRN_NET $GRN_PHYSNET
+create_provider_subnet  $GRN_NET $GRN_SBNET     $GRN_NETWORK_CIDR
+
+

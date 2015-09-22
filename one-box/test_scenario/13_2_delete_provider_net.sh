@@ -8,12 +8,6 @@ if [ -z ${OS_AUTH_URL+x} ]; then
 fi
 
 #==================================================================
-print_title "DELETE PROVIDER_NET: GREEN"
-#==================================================================
-delete_subnet $GRN_SBNET
-delete_net $GRN_NET
-
-#==================================================================
 print_title "DELETE PROVIDER_NET: ORANGE"
 #==================================================================
 delete_subnet $ORG_SBNET
