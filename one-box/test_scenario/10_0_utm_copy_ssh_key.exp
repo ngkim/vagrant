@@ -1,0 +1,20 @@
+#!/usr/bin/expect -f
+  set timeout 5 
+  set mgmt_ip [lindex $argv 0]
+  set nsname [lindex $argv 1]
+  set passwd [lindex $argv 2]
+  
+  send_log "### /START-SSH-SESSION/ IP: $mgmt_ip @ [exec date] ###\r"
+  
+  spawn ip netns exec $nsname scp /root/.ssh/id_rsa.pub root@$mgmt_ip:.ssh/authorized_keys
+  expect {
+    "*assword: " {
+      send "$passwd\r"
+      send_log "\r### /END-SSH-SESSION/ IP: $mgmt_ip @ [exec date] ###\r"
+      interact
+    }  
+    timeout {
+      interact
+    }
+  }  
+exit
