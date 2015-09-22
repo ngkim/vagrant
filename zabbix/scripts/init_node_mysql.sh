@@ -5,7 +5,7 @@
 # - http://blog.themilkyway.org/2013/11/how-to-monitor-mysql-using-the-new-zabbix-template-app-mysql/
 ##########################################################################################################
 
-ROOT_PASS="ohhberry3333"
+ROOT_PASS="111111111111"
 
 add_zabbix_account() {
   mysql -uroot -p${ROOT_PASS} -e"GRANT USAGE ON *.* TO 'zabbix'@'127.0.0.1' IDENTIFIED BY '${ROOT_PASS}'";
