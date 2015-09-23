@@ -13,6 +13,9 @@
       send_log "\r### /END-SSH-SESSION/ IP: $mgmt_ip @ [exec date] ###\r"
       interact
     }  
+    "No route to host" {
+      interact
+    }
     timeout {
       interact
     }

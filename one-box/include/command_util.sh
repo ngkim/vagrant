@@ -15,6 +15,12 @@ print_msg_high() {
   echo -e ${red}$msg${normal}
 }
 
+function run_commands_without_echo() {
+    commands=$*
+
+    eval $commands
+}
+
 function run_commands() {
     commands=$*
 

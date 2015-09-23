@@ -14,8 +14,19 @@ usage() {
   exit 0
 }
 
+print_ok() {
+  echo "OK"
+}
+
+print_error() {
+  MSG=$1
+  echo "ERR $POS"
+  exit 0
+}
+
 if [ -z $1 ]; then 
-  usage
+  #usage
+  print_error USAGE
 fi
 
 #################################################################
@@ -25,8 +36,9 @@ MGMT_IP=$1
 #################################################################
 
 ip_cmd() {
-  cmd="ip netns exec `ip netns | grep qrouter` $*"
-  run_commands $cmd
+  NETNS=`ip netns | grep qrouter`
+  cmd="ip netns exec $NETNS $*"
+  run_commands_without_echo $cmd &> /dev/null
 }
 
 check_result() {
@@ -39,7 +51,7 @@ check_result() {
 restart_service() {
   local svc=$1
 
-  print_title "*** Restart service: $svc"
+  #print_title "*** Restart service: $svc"
   ip_cmd ssh -oStrictHostKeyChecking=no ${MGMT_IP} jobcontrol request $svc
 }
 
@@ -59,7 +71,7 @@ config_uplink() {
 #  RED_NETADDRESS
 #  RED_NETMASK
 
-  print_title "*** Run update: $SCRIPT"
+  #print_title "*** Run update: $SCRIPT"
   ip_cmd ssh -oStrictHostKeyChecking=no ${MGMT_IP} $SCRIPT \
 				211.224.204.129 \
 				8.8.8.8 \
@@ -71,9 +83,10 @@ config_uplink() {
 				211.224.204.128 \
 				255.255.255.128
 
-  check_result $CONFIG
+  #check_result $CONFIG
 
   restart_service uplinksdaemonjob.updatewizard
+  print_ok
 }
 
 config_uplink
