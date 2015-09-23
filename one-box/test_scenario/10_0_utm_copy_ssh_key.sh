@@ -27,6 +27,13 @@ SSH_KEY="/root/.ssh/id_rsa.pub"
 
 #################################################################
 
+ip_cmd() {
+  cmd="ip netns exec `ip netns | grep qrouter` $*"
+  run_commands $cmd
+}
+
+#################################################################
+
 print_title "*** copy ssh-key to ${MGMT_IP}"
 if [ -f ${SSH_KEY} ]; then
   NSNAME=`ip netns | grep qrouter`
@@ -36,4 +43,12 @@ else
   ls ${SSH_KEY}
   print_msg "*** run ssh-keygen -t rsa"
 fi
+
+#################################################################
+
+print_title "*** Upload config scripts: ./utm_config"
+ip_cmd scp -r -oStrictHostKeyChecking=no utm_config/ ${MGMT_IP}:
+
+print_title "*** make config scripts executable"
+ip_cmd ssh -oStrictHostKeyChecking=no ${MGMT_IP} chmod +x utm_config/*.sh
 
