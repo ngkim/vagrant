@@ -47,17 +47,18 @@ config_neutron() {
 }
 
 config_neutron_ml2() {
-	set_config /etc/neutron/plugins/ml2/ml2_conf.ini ml2 type_drivers vlan
-	set_config /etc/neutron/plugins/ml2/ml2_conf.ini ml2 tenant_network_types vlan	
+	set_config /etc/neutron/plugins/ml2/ml2_conf.ini ml2 type_drivers flat,vlan
+	set_config /etc/neutron/plugins/ml2/ml2_conf.ini ml2 tenant_network_types flat,vlan
 	set_config /etc/neutron/plugins/ml2/ml2_conf.ini ml2 mechanism_drivers openvswitch
 
+	set_config /etc/neutron/plugins/ml2/ml2_conf.ini ml2_type_flat flat_networks ${FLAT_NETWORKS}
 	set_config /etc/neutron/plugins/ml2/ml2_conf.ini ml2_type_vlan network_vlan_ranges ${VLAN_RANGES}
 	
 	set_config /etc/neutron/plugins/ml2/ml2_conf.ini ovs integration_bridge br-int
 	set_config /etc/neutron/plugins/ml2/ml2_conf.ini ovs bridge_mappings ${BRIDGE_MAPPINGS}
 
 	#set_config /etc/neutron/plugins/ml2/ml2_conf.ini securitygroup firewall_driver neutron.agent.linux.iptables_firewall.OVSHybridIptablesFirewallDriver
-        set_config /etc/neutron/plugins/ml2/ml2_conf.ini securitygroup firewall_driver neutron.agent.firewall.NoopFirewallDriver
+	set_config /etc/neutron/plugins/ml2/ml2_conf.ini securitygroup firewall_driver neutron.agent.firewall.NoopFirewallDriver
 	set_config /etc/neutron/plugins/ml2/ml2_conf.ini securitygroup enable_security_group True
 	set_config /etc/neutron/plugins/ml2/ml2_conf.ini securitygroup enable_ipset True
 }
@@ -108,6 +109,7 @@ config_nova
 make_internal_bridge
 restart_neutron
 
+sleep 3
 #==================================================================
 print_title "NEUTRON NETWORK - VERIFY"
 #==================================================================

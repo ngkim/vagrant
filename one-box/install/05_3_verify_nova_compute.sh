@@ -1,6 +1,7 @@
 #!/bin/bash
 
 source "./00_check_config.sh"
+source "$WORK_HOME/include/print_util.sh"
 source "$WORK_HOME/include/openstack/01_identity.sh"
 source "$WORK_HOME/include/openstack/02_endpoint.sh"
 source "$WORK_HOME/include/openstack/03_database.sh"
@@ -50,11 +51,16 @@ restart_nova_compute() {
 }
 
 #==================================================================
-print_title "NOVA COMPUTE - INSTALL"
+print_title "NOVA COMPUTE - VERIFY"
 #==================================================================
 
-install_nova_compute
-config_nova
-config_nova_compute
-restart_nova_compute
+source $OPENRC
 
+cmd="nova service-list"
+run_commands $cmd
+
+cmd="nova endpoints"
+run_commands $cmd
+
+cmd="nova image-list"
+run_commands $cmd

@@ -52,10 +52,11 @@ config_neutron() {
 }
 
 config_neutron_ml2() {
-	set_config /etc/neutron/plugins/ml2/ml2_conf.ini ml2 type_drivers vlan
-	set_config /etc/neutron/plugins/ml2/ml2_conf.ini ml2 tenant_network_types vlan	
+	set_config /etc/neutron/plugins/ml2/ml2_conf.ini ml2 type_drivers flat,vlan
+	set_config /etc/neutron/plugins/ml2/ml2_conf.ini ml2 tenant_network_types flat,vlan
 	set_config /etc/neutron/plugins/ml2/ml2_conf.ini ml2 mechanism_drivers openvswitch
 
+	set_config /etc/neutron/plugins/ml2/ml2_conf.ini ml2_type_flat flat_networks ${FLAT_NETWORKS}
 	set_config /etc/neutron/plugins/ml2/ml2_conf.ini ml2_type_vlan network_vlan_ranges ${VLAN_RANGES}
 	
 	set_config /etc/neutron/plugins/ml2/ml2_conf.ini ovs integration_bridge br-int
@@ -122,6 +123,7 @@ sleep 3
 db_sync_neutron
 restart_neutron
 
+sleep 3
 #==================================================================
 print_title "NEUTRON - VERIFY"
 #==================================================================

@@ -34,6 +34,7 @@ create_openstack_rc() {
 	cat > $OPENRC <<EOF
 unset OS_PROJECT_DOMAIN_ID
 unset OS_USER_DOMAIN_ID
+unset OS_REGION_NAME
 unset OS_PROJECT_NAME
 unset OS_TENANT_NAME
 unset OS_USERNAME
@@ -42,6 +43,7 @@ unset OS_AUTH_URL
 
 export OS_PROJECT_DOMAIN_ID=default
 export OS_USER_DOMAIN_ID=default
+export OS_REGION_NAME=${REGION_NAME}
 export OS_PROJECT_NAME=admin
 export OS_TENANT_NAME=admin
 export OS_USERNAME=admin
@@ -55,6 +57,7 @@ EOF
 	cat > $OPENRC_v2 <<EOF
 unset OS_PROJECT_DOMAIN_ID
 unset OS_USER_DOMAIN_ID
+unset OS_REGION_NAME
 unset OS_PROJECT_NAME
 unset OS_TENANT_NAME
 unset OS_USERNAME
@@ -63,6 +66,7 @@ unset OS_AUTH_URL
 	
 export OS_PROJECT_DOMAIN_ID=default
 export OS_USER_DOMAIN_ID=default
+export OS_REGION_NAME=${REGION_NAME}
 export OS_PROJECT_NAME=admin
 export OS_TENANT_NAME=admin
 export OS_USERNAME=admin
