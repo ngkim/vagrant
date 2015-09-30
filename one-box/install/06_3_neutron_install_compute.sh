@@ -46,6 +46,17 @@ config_neutron() {
 	set_config /etc/neutron/neutron.conf keystone_authtoken password ${NEUTRON_PASS}
 }
 
+config_neutron_ml2_sriov() {
+	set_config /etc/neutron/plugins/ml2/ml2_conf.ini ml2 mechanism_drivers openvswitch,sriovnicswitch
+
+	set_config /etc/neutron/plugins/ml2/ml2_conf.ini ml2_sriov supported_pci_vendor_devs ${PCI_VENDOR_DEV}
+	set_config /etc/neutron/plugins/ml2/ml2_conf.ini ml2_sriov agent_required True
+
+	set_config /etc/neutron/plugins/ml2/ml2_conf.ini sriov_nic physical_device_mappings ${SRIOV_NIC}
+	set_config /etc/neutron/plugins/ml2/ml2_conf.ini sriov_nic exclude_devices ""
+
+}
+
 config_neutron_ml2() {
 	set_config /etc/neutron/plugins/ml2/ml2_conf.ini ml2 type_drivers flat,vlan
 	set_config /etc/neutron/plugins/ml2/ml2_conf.ini ml2 tenant_network_types flat,vlan
@@ -61,6 +72,10 @@ config_neutron_ml2() {
 	set_config /etc/neutron/plugins/ml2/ml2_conf.ini securitygroup firewall_driver neutron.agent.firewall.NoopFirewallDriver
 	set_config /etc/neutron/plugins/ml2/ml2_conf.ini securitygroup enable_security_group True
 	set_config /etc/neutron/plugins/ml2/ml2_conf.ini securitygroup enable_ipset True
+
+        if [ $NET_DRIVER == "sriov" ]; then 
+            config_neutron_ml2_sriov
+        fi
 }
 
 config_nova() {
