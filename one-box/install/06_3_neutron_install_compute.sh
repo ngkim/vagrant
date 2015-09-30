@@ -93,13 +93,13 @@ config_nova() {
 }
 
 make_internal_bridge() {
-	service openvswitch-switch restart
-	
-	for idx in ${!BRIDGE_LIST[@]}; do
-		bridge=${BRIDGE_LIST[$idx]}
-        
-       ovs-vsctl add-br $bridge
-	done	
+  service openvswitch-switch restart
+
+  for idx in ${!BRIDGE_LIST[@]}; do
+    bridge=${BRIDGE_LIST[$idx]}
+       
+    ovs-vsctl add-br $bridge
+  done	
 }
 
 restart_neutron() {
