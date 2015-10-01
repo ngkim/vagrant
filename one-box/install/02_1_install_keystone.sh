@@ -19,7 +19,7 @@ config_keystone() {
 	set_config /etc/keystone/keystone.conf DEFAULT use_syslog True
 	set_config /etc/keystone/keystone.conf DEFAULT syslog_log_facility LOG_LOCAL3
 	
-	set_config /etc/keystone/keystone.conf database connection mysql://keystone:${KEYSTONE_DBPASS}@controller/keystone
+	set_config /etc/keystone/keystone.conf database connection mysql://keystone:${KEYSTONE_DBPASS}@${BOXNAME}/keystone
 
 	set_config /etc/keystone/keystone.conf memcache servers localhost:11211
 
@@ -34,7 +34,7 @@ db_sync_keystone() {
 }
 
 config_apache() {
-	sed -i '1i ServerName controller' /etc/apache2/apache2.conf
+	sed -i '1i ServerName ${BOXNAME}' /etc/apache2/apache2.conf
 
 	cat > /etc/apache2/sites-available/wsgi-keystone.conf <<EOF
 Listen 5000

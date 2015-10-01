@@ -12,16 +12,16 @@ print_msg "  and remove admin_token_auth from the [pipeline:public_api], [pipeli
 
 unset OS_TOKEN OS_URL
 
-openstack --os-auth-url http://controller:35357 \
+openstack --os-auth-url http://${BOXNAME}:35357 \
   --os-project-domain-id default --os-user-domain-id default \
 --os-project-name admin --os-username admin --os-auth-type password --os-password ${ADMIN_PASS}\
   token issue  
   
-openstack --os-auth-url http://controller:35357 \
+openstack --os-auth-url http://${BOXNAME}:35357 \
   --os-project-name admin --os-username admin --os-auth-type password --os-password ${ADMIN_PASS} \
   project list  
 
-openstack --os-auth-url http://controller:35357 \
+openstack --os-auth-url http://${BOXNAME}:35357 \
   --os-project-name admin --os-username admin --os-auth-type password --os-password ${ADMIN_PASS} \
   user list
 
@@ -48,7 +48,7 @@ export OS_PROJECT_NAME=admin
 export OS_TENANT_NAME=admin
 export OS_USERNAME=admin
 export OS_PASSWORD=${ADMIN_PASS}
-export OS_AUTH_URL=http://controller:35357/v3
+export OS_AUTH_URL=http://${BOXNAME}:35357/v3
 EOF
 
 # python-ceilometerclient 1.0.13 has bug which cannot deal with keystone v3
@@ -71,7 +71,7 @@ export OS_PROJECT_NAME=admin
 export OS_TENANT_NAME=admin
 export OS_USERNAME=admin
 export OS_PASSWORD=${ADMIN_PASS}
-export OS_AUTH_URL=http://controller:35357/
+export OS_AUTH_URL=http://${BOXNAME}:35357/
 EOF
 }
 

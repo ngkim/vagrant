@@ -12,23 +12,23 @@ install_heat() {
 config_heat() {
 	local CFG_FILE="/etc/heat/heat.conf"
 	
-	set_config $CFG_FILE database connection mysql://heat:${HEAT_DBPASS}@controller/heat
+	set_config $CFG_FILE database connection mysql://heat:${HEAT_DBPASS}@${BOXNAME}/heat
 	
 	set_config $CFG_FILE DEFAULT rpc_backend rabbit
-	set_config $CFG_FILE oslo_messaging_rabbit rabbit_host controller
+	set_config $CFG_FILE oslo_messaging_rabbit rabbit_host ${BOXNAME}
 	set_config $CFG_FILE oslo_messaging_rabbit rabbit_userid openstack
 	set_config $CFG_FILE oslo_messaging_rabbit rabbit_password ${RABBIT_PASS}
 		
-	set_config $CFG_FILE keystone_authtoken auth_uri http://controller:5000/v2.0
-	set_config $CFG_FILE keystone_authtoken identity_uri http://controller:35357
+	set_config $CFG_FILE keystone_authtoken auth_uri http://${BOXNAME}:5000/v2.0
+	set_config $CFG_FILE keystone_authtoken identity_uri http://${BOXNAME}:35357
 	set_config $CFG_FILE keystone_authtoken admin_tenant_name service
 	set_config $CFG_FILE keystone_authtoken admin_user heat
 	set_config $CFG_FILE keystone_authtoken admin_password ${HEAT_PASS}
 	
-	set_config $CFG_FILE ec2authtoken auth_uri = http://controller:5000/v2.0
+	set_config $CFG_FILE ec2authtoken auth_uri = http://${BOXNAME}:5000/v2.0
 	
-	set_config $CFG_FILE DEFAULT heat_metadata_server_url http://controller:8000
-	set_config $CFG_FILE DEFAULT heat_waitcondition_server_url http://controller:8000/v1/waitcondition
+	set_config $CFG_FILE DEFAULT heat_metadata_server_url http://${BOXNAME}:8000
+	set_config $CFG_FILE DEFAULT heat_waitcondition_server_url http://${BOXNAME}:8000/v1/waitcondition
 	
 	set_config $CFG_FILE DEFAULT stack_domain_admin heat_domain_admin
 	set_config $CFG_FILE DEFAULT stack_domain_admin_password ${HEAT_DOMAIN_PASS}

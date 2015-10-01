@@ -31,13 +31,13 @@ config_neutron() {
 	set_config /etc/neutron/neutron.conf DEFAULT service_plugins router
 	set_config /etc/neutron/neutron.conf DEFAULT allow_overlapping_ips True
 
-	set_config /etc/neutron/neutron.conf oslo_messaging_rabbit rabbit_host controller
+	set_config /etc/neutron/neutron.conf oslo_messaging_rabbit rabbit_host ${BOXNAME}
 	set_config /etc/neutron/neutron.conf oslo_messaging_rabbit rabbit_userid openstack
 	set_config /etc/neutron/neutron.conf oslo_messaging_rabbit rabbit_password ${RABBIT_PASS}
 	
 	#keystone_authtoken
-	set_config /etc/neutron/neutron.conf keystone_authtoken auth_uri http://controller:5000
-	set_config /etc/neutron/neutron.conf keystone_authtoken auth_url http://controller:35357
+	set_config /etc/neutron/neutron.conf keystone_authtoken auth_uri http://${BOXNAME}:5000
+	set_config /etc/neutron/neutron.conf keystone_authtoken auth_url http://${BOXNAME}:35357
 	set_config /etc/neutron/neutron.conf keystone_authtoken auth_plugin password
 	set_config /etc/neutron/neutron.conf keystone_authtoken project_domain_id default
 	set_config /etc/neutron/neutron.conf keystone_authtoken user_domain_id default
@@ -84,9 +84,9 @@ config_nova() {
 	set_config /etc/nova/nova.conf DEFAULT linuxnet_interface_driver nova.network.linux_net.LinuxOVSInterfaceDriver
 	set_config /etc/nova/nova.conf DEFAULT firewall_driver nova.virt.firewall.NoopFirewallDriver
 	
-	set_config /etc/nova/nova.conf neutron url http://controller:9696
+	set_config /etc/nova/nova.conf neutron url http://${BOXNAME}:9696
 	set_config /etc/nova/nova.conf neutron auth_strategy keystone
-	set_config /etc/nova/nova.conf neutron admin_auth_url http://controller:35357/v2.0
+	set_config /etc/nova/nova.conf neutron admin_auth_url http://${BOXNAME}:35357/v2.0
 	set_config /etc/nova/nova.conf neutron admin_tenant_name service
 	set_config /etc/nova/nova.conf neutron admin_username neutron
 	set_config /etc/nova/nova.conf neutron admin_password ${NEUTRON_PASS}

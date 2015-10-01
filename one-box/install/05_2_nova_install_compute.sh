@@ -18,20 +18,20 @@ config_nova() {
 	set_config /etc/nova/nova.conf DEFAULT vnc_enabled True
 	set_config /etc/nova/nova.conf DEFAULT vncserver_listen 0.0.0.0
 	set_config /etc/nova/nova.conf DEFAULT vncserver_proxyclient_address ${COMP_MGMT_IP}
-	set_config /etc/nova/nova.conf DEFAULT novncproxy_base_url http://controller:6080/vnc_auto.html
+	set_config /etc/nova/nova.conf DEFAULT novncproxy_base_url http://${BOXNAME}:6080/vnc_auto.html
 	
-	set_config /etc/nova/nova.conf database connection mysql://nova:${NOVA_DBPASS}@controller/nova
+	set_config /etc/nova/nova.conf database connection mysql://nova:${NOVA_DBPASS}@${BOXNAME}/nova
 
-	set_config /etc/nova/nova.conf glance host controller
+	set_config /etc/nova/nova.conf glance host ${BOXNAME}
 
 	set_config /etc/nova/nova.conf oslo_concurrency lock_path /var/lib/nova/tmp
 
-	set_config /etc/nova/nova.conf oslo_messaging_rabbit rabbit_host controller
+	set_config /etc/nova/nova.conf oslo_messaging_rabbit rabbit_host ${BOXNAME}
 	set_config /etc/nova/nova.conf oslo_messaging_rabbit rabbit_userid openstack
 	set_config /etc/nova/nova.conf oslo_messaging_rabbit rabbit_password ${RABBIT_PASS}
 
-	set_config /etc/nova/nova.conf keystone_authtoken auth_uri http://controller:5000
-	set_config /etc/nova/nova.conf keystone_authtoken auth_url http://controller:35357
+	set_config /etc/nova/nova.conf keystone_authtoken auth_uri http://${BOXNAME}:5000
+	set_config /etc/nova/nova.conf keystone_authtoken auth_url http://${BOXNAME}:35357
 	set_config /etc/nova/nova.conf keystone_authtoken auth_plugin password
 	set_config /etc/nova/nova.conf keystone_authtoken project_domain_id default
 	set_config /etc/nova/nova.conf keystone_authtoken user_domain_id default

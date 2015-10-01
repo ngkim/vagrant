@@ -14,17 +14,32 @@ init_network_interfaces() {
 auto lo
 iface lo inet loopback
 
-# The primary network interface
-auto $PUBLIC_NIC
-iface em1 inet static
-        address $PUBLIC_IP
-        netmask $PUBLIC_SUBNET
-        gateway $PUBLIC_GW
-        # dns-* options are implemented by the resolvconf package, if installed
-        dns-nameservers $PUBLIC_DNS
-
 source /etc/network/interfaces.d/*.cfg
 EOF
+}
+
+config_public_mgmt_interface() {
+	local PUB_NIC=$1
+	local PUB_IP=$2
+	local PUB_SBNET=$3
+	local PUB_GW=$4
+	local PUB_DNS=$5
+	
+	# ------------------------------------------------------------------------------
+	print_title "public management network interface: $PUB_NIC"
+	# ------------------------------------------------------------------------------
+	
+	cat > /etc/network/interfaces.d/$PUB_NIC.cfg <<EOF
+# The primary network interface
+auto $PUB_NIC
+iface $PUB_NIC inet static
+        address $PUB_IP
+        netmask $PUB_SUBNET
+        gateway $PUB_GW
+        # dns-* options are implemented by the resolvconf package, if installed
+        dns-nameservers $PUB_DNS
+EOF
+	ifup $PUB_NIC
 }
 
 config_mgmt_interface() {
@@ -68,12 +83,19 @@ config_hosts() {
 	
 	cat > /etc/hosts <<EOF
 127.0.0.1 localhost
-${CTRL_MGMT_IP} controller $HOSTNAME
+${CTRL_MGMT_IP} ${BOXNAME} $HOSTNAME
 EOF
 
 }
 
 init_network_interfaces
-config_mgmt_interface ${CTRL_MGMT_NIC} ${CTRL_MGMT_IP} ${MGMT_SUBNET}
-config_external_interface ${EXT_NIC}
+if [ ! -z $PUBLIC_NIC ]; then
+  config_public_mgmt_interface $PUBLIC_NIC $PUBLIC_IP $PUBLIC_SUBNET $PUBLIC_GW $PUBLIC_DNS
+fi
+if [ ! -z $CTRL_MGMT_NIC ]; then
+  config_mgmt_interface ${CTRL_MGMT_NIC} ${CTRL_MGMT_IP} ${MGMT_SUBNET}
+fi
+if [ ! -z $EXT_NIC ]; then
+  config_external_interface ${EXT_NIC}
+fi
 config_hosts

@@ -22,17 +22,17 @@ config_neutron() {
 
 	set_config /etc/neutron/neutron.conf DEFAULT notify_nova_on_port_status_changes True
 	set_config /etc/neutron/neutron.conf DEFAULT notify_nova_on_port_data_changes True
-	set_config /etc/neutron/neutron.conf DEFAULT nova_url http://controller:8774/v2
+	set_config /etc/neutron/neutron.conf DEFAULT nova_url http://${BOXNAME}:8774/v2
 	
-	set_config /etc/neutron/neutron.conf database connection mysql://neutron:${NEUTRON_DBPASS}@controller/neutron
+	set_config /etc/neutron/neutron.conf database connection mysql://neutron:${NEUTRON_DBPASS}@${BOXNAME}/neutron
 
-	set_config /etc/neutron/neutron.conf oslo_messaging_rabbit rabbit_host controller
+	set_config /etc/neutron/neutron.conf oslo_messaging_rabbit rabbit_host ${BOXNAME}
 	set_config /etc/neutron/neutron.conf oslo_messaging_rabbit rabbit_userid openstack
 	set_config /etc/neutron/neutron.conf oslo_messaging_rabbit rabbit_password ${RABBIT_PASS}
 
 	#keystone_authtoken
-	set_config /etc/neutron/neutron.conf keystone_authtoken auth_uri http://controller:5000
-	set_config /etc/neutron/neutron.conf keystone_authtoken auth_url http://controller:35357
+	set_config /etc/neutron/neutron.conf keystone_authtoken auth_uri http://${BOXNAME}:5000
+	set_config /etc/neutron/neutron.conf keystone_authtoken auth_url http://${BOXNAME}:35357
 	set_config /etc/neutron/neutron.conf keystone_authtoken auth_plugin password
 	set_config /etc/neutron/neutron.conf keystone_authtoken project_domain_id default
 	set_config /etc/neutron/neutron.conf keystone_authtoken user_domain_id default
@@ -41,7 +41,7 @@ config_neutron() {
 	set_config /etc/neutron/neutron.conf keystone_authtoken password ${NEUTRON_PASS}
 
 	#nova
-	set_config /etc/neutron/neutron.conf nova auth_url http://controller:35357
+	set_config /etc/neutron/neutron.conf nova auth_url http://${BOXNAME}:35357
 	set_config /etc/neutron/neutron.conf nova auth_plugin password
 	set_config /etc/neutron/neutron.conf nova project_domain_id default
 	set_config /etc/neutron/neutron.conf nova user_domain_id default
@@ -74,9 +74,9 @@ config_nova() {
 	set_config /etc/nova/nova.conf DEFAULT linuxnet_interface_driver nova.network.linux_net.LinuxOVSInterfaceDriver
 	set_config /etc/nova/nova.conf DEFAULT firewall_driver nova.virt.firewall.NoopFirewallDriver
 	
-	set_config /etc/nova/nova.conf neutron url http://controller:9696
+	set_config /etc/nova/nova.conf neutron url http://${BOXNAME}:9696
 	set_config /etc/nova/nova.conf neutron auth_strategy keystone
-	set_config /etc/nova/nova.conf neutron admin_auth_url http://controller:35357/v2.0
+	set_config /etc/nova/nova.conf neutron admin_auth_url http://${BOXNAME}:35357/v2.0
 	set_config /etc/nova/nova.conf neutron admin_tenant_name service
 	set_config /etc/nova/nova.conf neutron admin_username neutron
 	set_config /etc/nova/nova.conf neutron admin_password ${NEUTRON_PASS}

@@ -15,10 +15,10 @@ config_glance_api() {
         set_config /etc/glance/glance-api.conf DEFAULT use_syslog True
         set_config /etc/glance/glance-api.conf DEFAULT syslog_log_facility LOG_LOCAL1
 	
-	set_config /etc/glance/glance-api.conf database connection mysql://glance:${GLANCE_DBPASS}@controller/glance
+	set_config /etc/glance/glance-api.conf database connection mysql://glance:${GLANCE_DBPASS}@${BOXNAME}/glance
 	
-	set_config /etc/glance/glance-api.conf keystone_authtoken auth_uri http://controller:5000
-	set_config /etc/glance/glance-api.conf keystone_authtoken auth_url http://controller:35357
+	set_config /etc/glance/glance-api.conf keystone_authtoken auth_uri http://${BOXNAME}:5000
+	set_config /etc/glance/glance-api.conf keystone_authtoken auth_url http://${BOXNAME}:35357
 	set_config /etc/glance/glance-api.conf keystone_authtoken auth_plugin password
 	set_config /etc/glance/glance-api.conf keystone_authtoken project_domain_id default
 	set_config /etc/glance/glance-api.conf keystone_authtoken user_domain_id default
@@ -38,10 +38,10 @@ config_glance_registry() {
 	set_config /etc/glance/glance-registry.conf DEFAULT use_syslog True
 	set_config /etc/glance/glance-registry.conf DEFAULT syslog_log_facility LOG_LOCAL1
 	
-	set_config /etc/glance/glance-registry.conf database connection mysql://glance:${GLANCE_DBPASS}@controller/glance
+	set_config /etc/glance/glance-registry.conf database connection mysql://glance:${GLANCE_DBPASS}@${BOXNAME}/glance
 	
-	set_config /etc/glance/glance-registry.conf keystone_authtoken auth_uri http://controller:5000
-	set_config /etc/glance/glance-registry.conf keystone_authtoken auth_url http://controller:35357
+	set_config /etc/glance/glance-registry.conf keystone_authtoken auth_uri http://${BOXNAME}:5000
+	set_config /etc/glance/glance-registry.conf keystone_authtoken auth_url http://${BOXNAME}:35357
 	set_config /etc/glance/glance-registry.conf keystone_authtoken auth_plugin password
 	set_config /etc/glance/glance-registry.conf keystone_authtoken project_domain_id default
 	set_config /etc/glance/glance-registry.conf keystone_authtoken user_domain_id default

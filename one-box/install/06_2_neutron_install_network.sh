@@ -31,13 +31,13 @@ config_neutron() {
 	set_config /etc/neutron/neutron.conf DEFAULT service_plugins router
 	set_config /etc/neutron/neutron.conf DEFAULT allow_overlapping_ips True
 
-	set_config /etc/neutron/neutron.conf oslo_messaging_rabbit rabbit_host controller
+	set_config /etc/neutron/neutron.conf oslo_messaging_rabbit rabbit_host ${BOXNAME}
 	set_config /etc/neutron/neutron.conf oslo_messaging_rabbit rabbit_userid openstack
 	set_config /etc/neutron/neutron.conf oslo_messaging_rabbit rabbit_password ${RABBIT_PASS}
 	
 	#keystone_authtoken
-	set_config /etc/neutron/neutron.conf keystone_authtoken auth_uri http://controller:5000
-	set_config /etc/neutron/neutron.conf keystone_authtoken auth_url http://controller:35357
+	set_config /etc/neutron/neutron.conf keystone_authtoken auth_uri http://${BOXNAME}:5000
+	set_config /etc/neutron/neutron.conf keystone_authtoken auth_url http://${BOXNAME}:35357
 	set_config /etc/neutron/neutron.conf keystone_authtoken auth_plugin password
 	set_config /etc/neutron/neutron.conf keystone_authtoken project_domain_id default
 	set_config /etc/neutron/neutron.conf keystone_authtoken user_domain_id default
@@ -77,8 +77,8 @@ config_neutron_dhcp_agent() {
 }
 
 config_neutron_metadata_agent() {
-	set_config /etc/neutron/metadata_agent.ini DEFAULT auth_uri http://controller:5000
-	set_config /etc/neutron/metadata_agent.ini DEFAULT auth_url http://controller:35357
+	set_config /etc/neutron/metadata_agent.ini DEFAULT auth_uri http://${BOXNAME}:5000
+	set_config /etc/neutron/metadata_agent.ini DEFAULT auth_url http://${BOXNAME}:35357
 	set_config /etc/neutron/metadata_agent.ini DEFAULT auth_region ${REGION_NAME}
 	set_config /etc/neutron/metadata_agent.ini DEFAULT auth_plugin password
 	set_config /etc/neutron/metadata_agent.ini DEFAULT project_domain_id default
@@ -95,7 +95,9 @@ config_neutron_metadata_agent() {
 make_ext_bridge() {
 	service openvswitch-switch restart
 	ovs-vsctl add-br br-ex
-	ovs-vsctl add-port br-ex ${EXT_NIC}
+        if [ ! -z ${EXT_NIC} ]; then
+          ovs-vsctl add-port br-ex ${EXT_NIC}
+        fi
 }
 
 restart_neutron() {	
