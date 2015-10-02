@@ -20,6 +20,12 @@ delete_subnet $GRN_SBNET
 delete_net $GRN_NET
 
 #==================================================================
+print_title "DELETE PROVIDER_NET: LOCAL"
+#==================================================================
+delete_subnet $LOC_SBNET
+delete_net $LOC_NET
+
+#==================================================================
 print_title "DELETE PROVIDER_NET: ORANGE"
 #==================================================================
 delete_subnet $ORG_SBNET

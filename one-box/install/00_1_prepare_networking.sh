@@ -18,6 +18,31 @@ source /etc/network/interfaces.d/*.cfg
 EOF
 }
 
+config_internet_bridge() {
+	local PUB_NIC=$1
+	local PUB_IP=$2
+	local PUB_SBNET=$3
+	local PUB_GW=$4
+	local PUB_DNS=$5
+	
+	# ------------------------------------------------------------------------------
+	print_title " internet bridge: br-internet ($PUB_NIC)"
+	# ------------------------------------------------------------------------------
+	
+	cat > /etc/network/interfaces.d/br-internet.cfg <<EOF
+# The primary network interface
+auto br-internet
+iface br-internet inet static
+    address $PUB_IP
+    netmask $PUB_SUBNET
+    gateway $PUB_GW
+    # dns-* options are implemented by the resolvconf package, if installed
+    dns-nameservers $PUB_DNS
+    bridge_ports $PUB_NIC
+EOF
+	ifup br-internet
+}
+
 config_public_mgmt_interface() {
 	local PUB_NIC=$1
 	local PUB_IP=$2
@@ -48,7 +73,7 @@ config_mgmt_interface() {
 	local MGMT_SBNET=$3
 	
 	# ------------------------------------------------------------------------------
-	print_title "management network interface: $NIC"
+	print_title "internal management network: $NIC"
 	# ------------------------------------------------------------------------------
 	
 	cat > /etc/network/interfaces.d/$NIC.cfg <<EOF
@@ -78,22 +103,36 @@ EOF
 	ifup $NIC
 }
 
+##############################################################################################
+# /etc/hosts 
+##############################################################################################
 config_hosts() {
-	print_title "/etc/hosts"
-	
-	cat > /etc/hosts <<EOF
+  print_title "/etc/hosts"
+
+  if [ ${BOXNAME} == ${HOSTNAME} ]; then
+    print_title "ERROR!!! HOSTNAME should not be the same with BOXNAME. It cloud make conflicts. HOSTNAME= ${HOSTNAME} BOXNAME= ${BOXNAME} !!!"
+    exit 1
+  fi
+  cat > /etc/hosts <<EOF
 127.0.0.1 localhost
-${CTRL_MGMT_IP} ${BOXNAME} $HOSTNAME
+${PUBLIC_IP} ${BOXNAME}
+${CTRL_MGMT_IP} ${HOSTNAME}
 EOF
 
 }
 
 init_network_interfaces
 if [ ! -z $PUBLIC_NIC ]; then
-  config_public_mgmt_interface $PUBLIC_NIC $PUBLIC_IP $PUBLIC_SUBNET $PUBLIC_GW $PUBLIC_DNS
+  config_internet_bridge $PUBLIC_NIC $PUBLIC_IP $PUBLIC_SUBNET $PUBLIC_GW $PUBLIC_DNS
+else
+  print_title "ERROR!!! PUBLIC NIC has not been assigned!!!"
+  exit 1
 fi
 if [ ! -z $CTRL_MGMT_NIC ]; then
   config_mgmt_interface ${CTRL_MGMT_NIC} ${CTRL_MGMT_IP} ${MGMT_SUBNET}
+else
+  print_title "ERROR!!! Internal Management Network has not been configured!!! Check your configurations!!!"
+  exit 1
 fi
 if [ ! -z $EXT_NIC ]; then
   config_external_interface ${EXT_NIC}

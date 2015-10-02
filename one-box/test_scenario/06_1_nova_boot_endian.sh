@@ -16,6 +16,8 @@ cmd="neutron net-list | awk '/${BLU_NET}/{print \$2}'"
 run_commands_return $cmd
 BLU_NET_ID=$RET
 
+
+
 create_port_in_provider_net() {
   local NET_NAME=$1
   local SBNET_NAME=$2
@@ -29,7 +31,7 @@ create_port_in_provider_net() {
   run_commands_return $cmd
   local _SBNET_ID=$RET
 
-  cmd="neutron port-list | awk '/${_NETWORK_IP}/{print \$2}'"
+  cmd="neutron port-list | grep ${_NETWORK_IP}\\\" | awk '/${_SBNET_ID}/{print \$2}'"
   run_commands_return $cmd
   _PORT_ID=$RET
 
@@ -49,6 +51,10 @@ RED_PORT_ID=$_PORT_ID
 # green-net-port
 create_port_in_provider_net $GRN_NET $GRN_SBNET $GRN_NETWORK_IP
 GRN_PORT_ID=$_PORT_ID
+
+# local-net-port
+create_port_in_provider_net $LOC_NET $LOC_SBNET $LOC_NETWORK_IP
+LOC_PORT_ID=$_PORT_ID
 
 # orange-net-port
 create_port_in_provider_net $ORG_NET $ORG_SBNET $ORG_NETWORK_IP
@@ -72,6 +78,7 @@ do_nova_boot() {
     cmd_nic="--nic net-id=$MGMT_NET_ID \
         --nic port-id=$RED_PORT_ID \
         --nic port-id=$GRN_PORT_ID \
+        --nic port-id=$LOC_PORT_ID \
         --nic port-id=$ORG_PORT_ID \
         --nic net-id=$BLU_NET_ID"
  

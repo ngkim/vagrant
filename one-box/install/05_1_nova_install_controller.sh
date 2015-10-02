@@ -92,14 +92,4 @@ install() {
 
 install
 
-#==================================================================
-print_title "NOVA - VERIFY"
-#==================================================================
 
-verify() {
-	source $OPENRC
-	nova service-list
-	nova endpoints
-}
-
-verify

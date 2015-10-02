@@ -9,8 +9,8 @@
 source "./00_check_config.sh"
 
 usage() {
-  echo "Usage: $0 [MGMT_IP]"
-  echo "   ex) $0 192.168.10.1"
+  echo "Usage: $0 [MGMT_IP] [RED_IP]"
+  echo "   ex) $0 192.168.10.1 211.224.204.227"
   exit 0
 }
 
@@ -19,19 +19,20 @@ print_ok() {
 }
 
 print_error() {
-  MSG=$1
-  echo "ERR $POS"
+  MSG=$*
+  echo "ERR $MSG"
   exit 0
 }
 
-if [ -z $1 ]; then 
+if [ -z $2 ]; then 
   #usage
-  print_error USAGE
+  print_error USAGE: Check command usage
 fi
 
 #################################################################
 
 MGMT_IP=$1
+RED_IP=$2
 
 #################################################################
 
@@ -76,10 +77,10 @@ config_uplink() {
 				211.224.204.129 \
 				8.8.8.8 \
 				8.8.8.9 \
-				211.224.204.216 \
+				${RED_IP} \
 				211.224.204.255 \
 				25 \
-				211.224.204.216/25 \
+				${RED_IP}/25 \
 				211.224.204.128 \
 				255.255.255.128
 

@@ -11,3 +11,11 @@ set_config() {
 		crudini --set --existing $CFG_FILE $CFG_SECTION $CFG_PARAM $CFG_VALUE
 	fi
 }
+
+clear_config() {
+	local CFG_FILE=$1
+	local CFG_SECTION=$2
+	local CFG_PARAM=$3
+	
+	VAL=`crudini --del --existing $CFG_FILE $CFG_SECTION $CFG_PARAM`
+}

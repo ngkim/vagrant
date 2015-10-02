@@ -20,7 +20,7 @@ print_ok() {
 
 print_error() {
   MSG=$1
-  echo "ERR $POS"
+  echo "ERR $MSG"
   exit 0
 }
 
@@ -41,7 +41,8 @@ SSH_KEY="/root/.ssh/id_rsa.pub"
 ip_cmd() {
   NETNS=`ip netns | grep qrouter`
   cmd="ip netns exec $NETNS $*"
-  run_commands_without_echo $cmd &> /dev/null
+  #run_commands_without_echo $cmd &> /dev/null
+  run_commands $cmd
 }
 
 #################################################################
@@ -52,10 +53,10 @@ if [ -f ${SSH_KEY} ]; then
   ./10_0_utm_copy_ssh_key.exp ${MGMT_IP} $NSNAME $PASSWD  &> /dev/null
   print_ok
 else
-  #print_msg "*** no ssh key file exist"
-  #ls ${SSH_KEY}
-  #print_msg "*** run ssh-keygen -t rsa"
-  print_er
+  print_msg "*** no ssh key file exist"
+  ls ${SSH_KEY}
+  print_msg "*** run ssh-keygen -t rsa"
+  print_error
 fi
 
 #################################################################

@@ -1,7 +1,7 @@
 
 env_setup() {
 	export OS_TOKEN=${ADMIN_TOKEN}
-	export OS_URL=http://controller:35357/v2.0
+	export OS_URL=http://${BOXNAME}:35357/v2.0
 }
 
 create_project() {

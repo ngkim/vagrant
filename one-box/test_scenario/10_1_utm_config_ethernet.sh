@@ -9,8 +9,8 @@
 source "./00_check_config.sh"
 
 usage() {
-  echo "Usage: $0 [MGMT_IP]"
-  echo "   ex) $0 192.168.10.1"
+  echo "Usage: $0 [MGMT_IP] [GREEN_IP] [ORANGE_IP]"
+  echo "   ex) $0 192.168.10.1 192.168.0.252 192.168.1.252"
   exit 0
 }
 
@@ -24,7 +24,7 @@ print_error() {
   exit 0
 }
 
-if [ -z $1 ]; then 
+if [ -z $3 ]; then 
   #usage
   print_error USAGE
 fi
@@ -33,6 +33,8 @@ fi
 #################################################################
 
 MGMT_IP=$1
+GREEN_IP=$2
+ORANGE_IP=$3
 
 #################################################################
 
@@ -75,14 +77,14 @@ config_ethernet() {
 
   #print_title "*** Run update: $SCRIPT"
   ip_cmd ssh -oStrictHostKeyChecking=no ${MGMT_IP} $SCRIPT \
-				192.168.0.252 \
+				${GREEN_IP} \
                                 192.168.0.255 \
-                                192.168.0.252/24 \
+                                ${GREEN_IP}/24 \
                                 192.168.0.0 \
-				192.168.1.252 \
+				${ORANGE_IP} \
                                 192.168.1.255 \
                                 24 \
-                                192.168.1.252/24 \
+                                ${ORANGE_IP}/24 \
                                 192.168.1.0 \
                                 255.255.255.0
 

@@ -32,8 +32,17 @@ orange() {
   create_provider_subnet  $ORG_NET $ORG_SBNET     $ORG_NETWORK_CIDR
 }
 
+localnet() {
+  #==================================================================
+  print_title "PROVIDER_NET: LOCAL"
+  #==================================================================
+  create_flat_net     $LOC_NET $LOC_PHYSNET
+  create_provider_subnet  $LOC_NET $LOC_SBNET $LOC_NETWORK_CIDR
+}
+
 red
 green
 orange
+localnet
 
 

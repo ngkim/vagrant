@@ -7,7 +7,7 @@ source "../include/print_util.sh"
 ####################################################
 SV_ADDR="211.224.204.202"
 DB_PASS="ohhberry3333"
-ZAGENT_HOST="OneBox01"
+ZAGENT_HOST="OneBox03"
 #---------------------------------------------------
 ZAB_AGENTD_CFG="/etc/zabbix/zabbix_agentd.conf"
 ####################################################

@@ -2,6 +2,9 @@
 
 #filepath for settings
 SettingsFile='/var/efw/ethernet/settings'
+GreenSettingsFile='/var/efw/ethernet/br0'
+OrangeSettingsFile='/var/efw/ethernet/br1'
+BlueSettingsFile='/var/efw/ethernet/br2'
 
 #LineBuilder Function
 lineBuilder () {
@@ -29,6 +32,11 @@ echo "ORANGE_DEV=br1" >> $SettingsFile
 lineBuilder "ORANGE_IPS" $8
 lineBuilder "ORANGE_NETADDRESS" $9
 lineBuilder "ORANGE_NETMASK" ${10}
+
+echo "eth2" > $GreenSettingsFile
+echo "eth3" >> $GreenSettingsFile
+echo "eth4" > $OrangeSettingsFile
+echo "eth5" > $BlueSettingsFile
 
 #retrun result
 if [ -e $SettingsFile ]
