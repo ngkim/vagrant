@@ -10,19 +10,12 @@ lineBuilder () {
     fi
 }
 
-SettingsFile="/var/efw/snat/config"
-SettingsFile1="/var/efw/outgoing/config"
+SettingsFile="/var/efw/zonefw/config"
 
 #make a setting file for parameters
 rm -f $SettingsFile
 
-RED_IP=${1}
-GRN_SBNET=${2}
-ORG_SBNET=${3}
-BLU_SBNET=${4}
-
-echo "on,,${GRN_SBNET}&${ORG_SBNET}&${BLU_SBNET},,,UPLINK:main,SNAT,,,${RED_IP}" > $SettingsFile
-echo "on,,,,,ACCEPT,,,,GREEN,UPLINK:main," > $SettingsFile1
+echo "on,,,,,ALLOW,,,,GREEN&BLUE&ORANGE,GREEN&BLUE&ORANGE" > $SettingsFile
 
 #retrun result
 if [ -e $SettingsFile ]

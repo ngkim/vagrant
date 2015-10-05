@@ -21,6 +21,10 @@ MGMT_NET_ID=$RET
 create_port_in_provider_net $ORG_NET $ORG_SBNET $ORG_WAF_IP
 ORG_PORT_ID=$_PORT_ID
 
+# local-net-port
+create_port_in_provider_net $LOC_NET $LOC_SBNET $LOC_NETWORK_IP_WAF
+LOC_PORT_ID=$_PORT_ID
+
 do_nova_boot() {
     local _VM_NAME=$1
     local _VM_IMAGE=$2
@@ -39,6 +43,7 @@ do_nova_boot() {
         --image $IMAGE_ID \
         --nic net-id=$MGMT_NET_ID \
         --nic port-id=$ORG_PORT_ID \
+        --nic port-id=$LOC_PORT_ID \
         --availability-zone $AV_ZONE \
         --security-groups default"
 

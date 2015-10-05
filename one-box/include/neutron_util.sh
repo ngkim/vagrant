@@ -12,7 +12,7 @@ create_port_in_provider_net() {
   run_commands_return $cmd
   local _SBNET_ID=$RET
 
-  cmd="neutron port-list | awk '/${_NETWORK_IP}/{print \$2}'"
+  cmd="neutron port-list | grep ${_NETWORK_IP}\\\" | awk '/${_SBNET_ID}/{print \$2}'"
   run_commands_return $cmd
   _PORT_ID=$RET
 

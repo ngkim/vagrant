@@ -9,8 +9,8 @@
 source "./00_check_config.sh"
 
 usage() {
-  echo "Usage: $0 [MGMT_IP] [RED_IP] [Green_Subnet] [Orange_Subnet] [Blue_Subnet]"
-  echo "   ex) $0 192.168.10.1 211.224.204.227 192.168.0.0/24 192.168.1.0/24 192.168.2.0/24"
+  echo "Usage: $0 [MGMT_IP] [RED_IP] [WAF_IP]"
+  echo "   ex) $0 192.168.10.1 211.224.204.227 192.168.10.9"
   exit 0
 }
 
@@ -33,9 +33,7 @@ fi
 
 MGMT_IP=$1
 RED_IP=$2
-GRN_SBNET=$3
-ORG_SBNET=$4
-BLU_SBNET=$5
+WAF_IP=$3
 
 #################################################################
 
@@ -61,9 +59,9 @@ restart_service() {
 
 #################################################################
 
-config_snat() {
-  local SCRIPT="./utm_config/ktutm_setup_snat.sh"
-  local CONFIG="/var/efw/snat/config"
+config_dnat() {
+  local SCRIPT="./utm_config/ktutm_setup_zonefw.sh"
+  local CONFIG="/var/efw/zonefw/config"
 
 #  RED_IP
 #  GRN_SBNET
@@ -71,17 +69,12 @@ config_snat() {
 #  BLU_SBNET
 
   #print_title "*** Run update: $SCRIPT"
-  ip_cmd ssh -oStrictHostKeyChecking=no ${MGMT_IP} $SCRIPT \
-				${RED_IP} \
-				${GRN_SBNET} \
-				${ORG_SBNET} \
-				${BLU_SBNET}
+  ip_cmd ssh -oStrictHostKeyChecking=no ${MGMT_IP} $SCRIPT
 
-  restart_service setsnat
-  restart_service setoutgoing
+  restart_service setdnat
   print_ok
 }
 
-config_snat
+config_dnat
 
 

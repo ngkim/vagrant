@@ -10,19 +10,16 @@ lineBuilder () {
     fi
 }
 
-SettingsFile="/var/efw/snat/config"
-SettingsFile1="/var/efw/outgoing/config"
+SettingsFile="/var/efw/xtaccess/config"
 
 #make a setting file for parameters
 rm -f $SettingsFile
 
-RED_IP=${1}
-GRN_SBNET=${2}
-ORG_SBNET=${3}
-BLU_SBNET=${4}
+SBNET_LIST=$1
+HOST_LIST=$2
+PORT_LIST=$3
 
-echo "on,,${GRN_SBNET}&${ORG_SBNET}&${BLU_SBNET},,,UPLINK:main,SNAT,,,${RED_IP}" > $SettingsFile
-echo "on,,,,,ACCEPT,,,,GREEN,UPLINK:main," > $SettingsFile1
+echo "tcp,${SBNET_LIST}&${HOST_LIST},${PORT_LIST},on,,ANY,,INPUTFW,ACCEPT,," > $SettingsFile
 
 #retrun result
 if [ -e $SettingsFile ]

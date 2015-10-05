@@ -9,8 +9,8 @@
 source "./00_check_config.sh"
 
 usage() {
-  echo "Usage: $0 [MGMT_IP] [GREEN_IP] [ORANGE_IP]"
-  echo "   ex) $0 192.168.10.1 192.168.0.252 192.168.1.252"
+  echo "Usage: $0 [MGMT_IP] [GREEN_IP] [ORANGE_IP] [BLUE_IP]"
+  echo "   ex) $0 192.168.10.1 192.168.0.252 192.168.1.252 192.168.2.252"
   exit 0
 }
 
@@ -24,7 +24,7 @@ print_error() {
   exit 0
 }
 
-if [ -z $3 ]; then 
+if [ -z $4 ]; then 
   #usage
   print_error USAGE
 fi
@@ -35,6 +35,7 @@ fi
 MGMT_IP=$1
 GREEN_IP=$2
 ORANGE_IP=$3
+BLUE_IP=$4
 
 #################################################################
 
@@ -86,7 +87,14 @@ config_ethernet() {
                                 24 \
                                 ${ORANGE_IP}/24 \
                                 192.168.1.0 \
+                                255.255.255.0 \
+                                ${BLUE_IP} \
+                                192.168.2.255 \
+                                24 \
+                                ${BLUE_IP}/24 \
+                                192.168.2.0 \
                                 255.255.255.0
+
 
   #check_result $CONFIG
 

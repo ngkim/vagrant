@@ -3,7 +3,9 @@
 source "./00_check_config.sh"
 
 NS=`ip netns | grep qrouter`
-WAF_IP="192.168.10.41"
+WAF_IP="192.168.10.9"
+WAF_PASS="penta7728"
+WAF_PASS="wafpenta!23"
 DEBUG=1
 
 debug_msg() {
@@ -15,7 +17,7 @@ debug_msg() {
 
 get_session_id() {
   debug_msg "${FUNCNAME}: request"
-  local RET=`ip netns exec $NS curl --insecure -H \"Expect:\" -vX POST https://${WAF_IP}/webapi/auth -d 'id=admin&password=penta7728' 2>&1 | awk '/WP_SESSID/{print \$3}'`
+  local RET=`ip netns exec $NS curl --insecure -H \"Expect:\" -vX POST https://${WAF_IP}/webapi/auth -d 'id=admin&password='${WAF_PASS} 2>&1 | awk '/WP_SESSID/{print \$3}'`
   debug_msg "${FUNCNAME}: $RET"
 
   KEY=${RET:0:36}
@@ -29,11 +31,13 @@ waf_get_call() {
 }
 
 waf_put_call() {
+  echo "ip netns exec $NS curl --insecure -b $KEY -H \"Content-Type:application/x-www-form-urlencoded\" -d '{\"management_route\":[{\"nic\":\"eth0\",\"gateway\":\"192.168.10.8\",\"netmask\":\"0.0.0.0\",\"dest_ip\":\"0.0.0.0\"},{\"nic\":\"eth2\",\"gateway\":\"0.0.0.0\",\"netmask\":\"255.255.255.0\",\"dest_ip\":\"192.168.2.0\"},{\"nic\":\"eth0\",\"gateway\":\"0.0.0.0\",\"netmask\":\"255.255.255.0\",\"dest_ip\":\"192.168.10.0\"}]}' -vX PUT https://${WAF_IP}/webapi/conf/management_route"
+
   ip netns exec $NS \
 	curl --insecure \
 		-b $KEY \
 		-H "Content-Type:application/x-www-form-urlencoded" \
-		-d '{"management_route":[{"nic":"eth0","gateway":"192.168.10.40","netmask":"0.0.0.0","dest_ip":"0.0.0.0"},{"nic":"eth0","gateway":"0.0.0.0","netmask":"255.255.255.0","dest_ip":"192.168.10.0"}]}' -vX PUT https://${WAF_IP}/webapi/conf/management_route 2> /dev/null
+		-d '{"management_route":[{"nic":"eth0","gateway":"192.168.10.8","netmask":"0.0.0.0","dest_ip":"0.0.0.0"},{"nic":"eth2","gateway":"0.0.0.0","netmask":"255.255.255.0","dest_ip":"192.168.2.0"},{"nic":"eth0","gateway":"0.0.0.0","netmask":"255.255.255.0","dest_ip":"192.168.10.0"}]}' -vX PUT https://${WAF_IP}/webapi/conf/management_route 2> /dev/null
 }
 
 show_interfaces() {
@@ -69,8 +73,8 @@ get_session_id
 #show_traffic
 #echo ""
 
-#waf_put_call 
+waf_put_call 
 
-show_management_route
+#show_management_route
 
 #waf_get_call https://192.168.10.9/webapi/conf/management_route
