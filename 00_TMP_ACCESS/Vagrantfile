@@ -1,0 +1,30 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+require "../include/vnode.rb"
+
+=begin
+* For remote access of the testbed from outside network
+  - open ssh port only, don't use port number 22 for this
+  - block all access except ssh
+=end
+
+# Base NAT Port
+BNP=6300
+
+nat_map_default = {"ssh" => { 22 => BNP + 22 }}
+sync_folder_default = {}
+
+access   = Node.new("ACCESS"  , [], 2, 2048, nat_map_default, sync_folder_default)
+
+# list of nodes and switches
+nodes     = [access ]
+switches  = []  
+
+# Vagrantfile API/syntax version. Don't touch unless you know what you're doing!
+VAGRANTFILE_API_VERSION = "2"
+
+Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
+  create_switches(switches, config)
+  create_nodes(nodes, config)  
+end
