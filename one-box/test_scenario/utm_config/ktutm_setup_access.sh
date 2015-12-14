@@ -19,6 +19,7 @@ SBNET_LIST=$1
 HOST_LIST=$2
 PORT_LIST=$3
 
+echo "tcp,${SBNET_LIST}&${HOST_LIST},${PORT_LIST},on,,ANY,,INPUTFW,ACCEPT,,"
 echo "tcp,${SBNET_LIST}&${HOST_LIST},${PORT_LIST},on,,ANY,,INPUTFW,ACCEPT,," > $SettingsFile
 
 #retrun result

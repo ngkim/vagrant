@@ -47,7 +47,7 @@ ip_cmd() {
 
 #################################################################
 
-#print_title "*** copy ssh-key to ${MGMT_IP}"
+print_title "*** copy ssh-key to ${MGMT_IP}"
 if [ -f ${SSH_KEY} ]; then
   NSNAME=`ip netns | grep qrouter`
   ./10_0_utm_copy_ssh_key.exp ${MGMT_IP} $NSNAME $PASSWD  &> /dev/null

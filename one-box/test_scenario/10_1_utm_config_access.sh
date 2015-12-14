@@ -54,11 +54,18 @@ check_result() {
   ip_cmd ssh -oStrictHostKeyChecking=no ${MGMT_IP} cat $CONFIG
 }
 
+request_service_action() {
+  local svc=$1
+
+  #print_title "*** Request service action: $svc"
+  ip_cmd ssh -oStrictHostKeyChecking=no ${MGMT_IP} jobcontrol request $svc
+}
+
 restart_service() {
   local svc=$1
 
   #print_title "*** Restart service: $svc"
-  ip_cmd ssh -oStrictHostKeyChecking=no ${MGMT_IP} jobcontrol request $svc
+  ip_cmd ssh -oStrictHostKeyChecking=no ${MGMT_IP} jobcontrol restart $svc
 }
 
 #################################################################
@@ -67,7 +74,8 @@ config_access() {
   local SCRIPT="./utm_config/ktutm_setup_access.sh"
 
   #print_title "*** Run update: $SCRIPT"
-  ip_cmd ssh -oStrictHostKeyChecking=no ${MGMT_IP} $SCRIPT $SBNET_LIST $HOST_LIST $PORT_LIST
+  #echo "ip_cmd ssh -oStrictHostKeyChecking=no ${MGMT_IP} $SCRIPT $SBNET_LIST $HOST_LIST $PORT_LIST"
+  ip_cmd ssh -oStrictHostKeyChecking=no ${MGMT_IP} $SCRIPT \"$SBNET_LIST\" \"$HOST_LIST\" \"$PORT_LIST\"
 
   restart_service setxtaccess
   print_ok

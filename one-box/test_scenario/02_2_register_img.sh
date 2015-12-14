@@ -11,8 +11,9 @@ register_image() {
   local _IMAGE_FILE=$2
 
   if [ -f images/${_IMAGE_FILE} ]; then
-    cmd="glance image-create --name=${_IMAGE_LABEL} --disk-format=$FILEFORMAT \
-        --container-format=$CONTAINERFORMAT --visibility $ACCESSVALUE --progress --file images/${_IMAGE_FILE}"
+    cmd="glance image-create --name ${_IMAGE_LABEL} --disk-format $FILEFORMAT \
+        --container-format $CONTAINERFORMAT --visibility $ACCESSVALUE --progress --file images/${_IMAGE_FILE}"
+#        --container-format=$CONTAINERFORMAT --progress --file images/${_IMAGE_FILE}"
     run_commands $cmd
   fi
 }
