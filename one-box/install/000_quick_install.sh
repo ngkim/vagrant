@@ -1,5 +1,26 @@
 #!/bin/bash
 
+METHOD_LIST[0]="prepare"
+METHOD_LIST[1]="install_base"
+METHOD_LIST[2]="install_keystone"
+METHOD_LIST[3]="install_glance"
+METHOD_LIST[4]="install_nova"
+METHOD_LIST[5]="install_neutron"
+METHOD_LIST[6]="install_horizon"
+METHOD_LIST[7]="install_heat"
+
+usage() {
+  echo "Usage: $0 [MODE]"
+  echo "   ex) $0 [manual/auto]"
+  exit 0
+}
+
+if [ -z $1 ]; then
+ usage
+else
+ mode=$1 
+fi
+
 prepare() {
   ./00_1_prepare_networking.sh
   ./00_2_prepare_repository.sh
@@ -59,45 +80,51 @@ check_continue() {
   read line
 }
 
-METHOD_LIST[0]="prepare"
-METHOD_LIST[1]="install_base"
-METHOD_LIST[2]="install_keystone"
-METHOD_LIST[3]="install_glance"
-METHOD_LIST[4]="install_nova"
-METHOD_LIST[5]="install_neutron"
-METHOD_LIST[6]="install_horizon"
-METHOD_LIST[7]="install_heat"
+install() {
+  method=$1
 
-run() {
-  for idx in ${!METHOD_LIST[@]}; do
-    method=${METHOD_LIST[$idx]}
-    echo "------------------------------------------------------------------------"
-    echo "=     RUN $method      ="
-    echo "------------------------------------------------------------------------"
-    check_continue $method
-    if [ "$line" == "Y" ] ||  [ "$line" == "y" ]; then
-      eval "$method" 2>&1 | tee -a log/$method.log
-    elif [ "$line" == "N" ] ||  [ "$line" == "n" ]; then
-      echo "*** SKIP INSTALLING $method"
-    elif [ "$line" == "Q" ] ||  [ "$line" == "q" ]; then
-      echo "*** STOP INSTALLATION"
-      exit 0
-    else
-      echo ""
-      echo ""
-      echo ""
-      echo ""
-      echo ""
-      echo "*** STOP INSTALLATION"
-      echo ""
-      echo ""
-      echo ""
-      echo ""
-      echo ""
-      exit 0
-    fi
-    echo "------------------------------------------------------------------------"
-  done
+  eval "$method" 2>&1 | tee -a log/$method.log
 }
 
-run
+check_and_install() {
+  method=$1
+
+  check_continue $method
+  if [ "$line" == "Y" ] ||  [ "$line" == "y" ]; then
+    install $method
+  elif [ "$line" == "N" ] ||  [ "$line" == "n" ]; then
+    echo "*** SKIP INSTALLING $method"
+  elif [ "$line" == "Q" ] ||  [ "$line" == "q" ]; then
+    echo "*** STOP INSTALLATION"
+    exit 0
+  else
+    echo ""
+    printf "%-100s\n" "------------------------------------------------------------------------"
+    echo "*** STOP INSTALLATION"
+    printf "%-100s\n" "------------------------------------------------------------------------"
+    echo ""
+    exit 0
+  fi
+}
+
+run() {
+  mode=$1
+
+  for idx in ${!METHOD_LIST[@]}; do
+    method=${METHOD_LIST[$idx]}
+
+    printf "%-100s\n" "------------------------------------------------------------------------"
+    printf "===     RUN %-56s ===\n" $method
+    printf "%-100s\n" "------------------------------------------------------------------------"
+
+    if [ "$mode" == "manual" ] ; then
+      check_and_install $method
+    else 
+      install $method
+    fi
+
+  done
+  printf "%-100s\n" "------------------------------------------------------------------------"
+}
+
+run $mode
