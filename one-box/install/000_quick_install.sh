@@ -46,21 +46,42 @@ install_heat() {
   ./08_heat_install.sh
 }
 
+install_ceilometer() {
+  ./09_1_ceilometer_install_controller_mongodb.sh
+  ./09_2_ceilometer_install_controller.sh
+  ./09_3_ceilometer_install_compute.sh
+  ./09_4_ceilometer_install_image.sh
+}
+
 check_continue() {
   PKG_NAME=$1
-  echo "Install $PKG_NAME? (Y/N) "
+  echo "Install $PKG_NAME? (Y/N/Q) "
   read line
 }
 
-METHOD_LIST="prepare install_base install_keystone install_glance install_nova install_neutron install_horizon install_heat"
+METHOD_LIST[0]="prepare"
+METHOD_LIST[1]="install_base"
+METHOD_LIST[2]="install_keystone"
+METHOD_LIST[3]="install_glance"
+METHOD_LIST[4]="install_nova"
+METHOD_LIST[5]="install_neutron"
+METHOD_LIST[6]="install_horizon"
+METHOD_LIST[7]="install_heat"
 
 run() {
-  for method in $METHOD_LIST; do
+  for idx in ${!METHOD_LIST[@]}; do
+    method=${METHOD_LIST[$idx]}
+    echo "------------------------------------------------------------------------"
+    echo "=     RUN $method      ="
+    echo "------------------------------------------------------------------------"
     check_continue $method
     if [ "$line" == "Y" ] ||  [ "$line" == "y" ]; then
-      eval $method
+      eval "$method" 2>&1 | tee -a log/$method.log
     elif [ "$line" == "N" ] ||  [ "$line" == "n" ]; then
       echo "*** SKIP INSTALLING $method"
+    elif [ "$line" == "Q" ] ||  [ "$line" == "q" ]; then
+      echo "*** STOP INSTALLATION"
+      exit 0
     else
       echo ""
       echo ""
@@ -75,12 +96,8 @@ run() {
       echo ""
       exit 0
     fi
+    echo "------------------------------------------------------------------------"
   done
-
-#./09_1_ceilometer_install_controller_mongodb.sh
-#./09_2_ceilometer_install_controller.sh
-#./09_3_ceilometer_install_compute.sh
-#./09_4_ceilometer_install_image.sh
 }
 
 run

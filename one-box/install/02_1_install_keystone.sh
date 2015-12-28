@@ -34,7 +34,7 @@ db_sync_keystone() {
 }
 
 config_apache() {
-	sed -i '1i ServerName ${BOXNAME}' /etc/apache2/apache2.conf
+	sed -i '1i ServerName '${BOXNAME} /etc/apache2/apache2.conf
 
 	cat > /etc/apache2/sites-available/wsgi-keystone.conf <<EOF
 Listen 5000

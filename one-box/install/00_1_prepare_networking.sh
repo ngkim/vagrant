@@ -34,7 +34,7 @@ config_internet_bridge() {
 auto br-internet
 iface br-internet inet static
     address $PUB_IP
-    netmask $PUB_SUBNET
+    netmask $PUB_SBNET
     gateway $PUB_GW
     # dns-* options are implemented by the resolvconf package, if installed
     dns-nameservers $PUB_DNS

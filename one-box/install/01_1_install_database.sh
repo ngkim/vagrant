@@ -20,7 +20,7 @@ config_db() {
 	
 	cat > /etc/mysql/conf.d/mysqld_openstack.cnf <<EOF
 [mysqld]
-bind-address = ${CTRL_MGMT_IP}
+bind-address = 0.0.0.0
 default-storage-engine = innodb
 innodb_file_per_table
 collation-server = utf8_general_ci
