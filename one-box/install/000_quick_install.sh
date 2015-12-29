@@ -83,6 +83,7 @@ check_continue() {
 install() {
   method=$1
 
+  mkdir -p log
   eval "$method" 2>&1 | tee -a log/$method.log
 }
 
