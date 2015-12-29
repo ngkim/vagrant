@@ -8,6 +8,7 @@ METHOD_LIST[4]="install_nova"
 METHOD_LIST[5]="install_neutron"
 METHOD_LIST[6]="install_horizon"
 METHOD_LIST[7]="install_heat"
+METHOD_LIST[8]="install_rsyslog"
 
 usage() {
   echo "Usage: $0 [MODE]"
@@ -30,6 +31,9 @@ install_base() {
   ./01_1_install_database.sh
   ./01_2_install_msgQ.sh
   ./01_3_install_ntp.sh
+}
+
+install_rsyslog() {
   ./01_4_install_rsyslog.sh
 }
 

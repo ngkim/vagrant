@@ -1,5 +1,4 @@
-#!/bin/bash
-
+#!/bin/bash 
 source "./00_check_config.sh"
 
 install_rsyslog() {
