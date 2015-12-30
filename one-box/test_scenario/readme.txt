@@ -2,6 +2,22 @@
 
 0) ext-net.ini 파일확인
 
+1) Ubuntu Image Download & Register Image
+- https://cloud-images.ubuntu.com/trusty/current/trusty-server-cloudimg-amd64-disk1.img
+- 다운받은 이미지는 images 폴더를 만들어 이동
+
+	>> ./02_2_register_img.sh 실행
+
+2) Global MGMT Net 생성
+
+	>> ./03_1_create_tenant_net.sh
+
+3) Provider Network 생성
+- 아래 스크립트는 flat 네트워크인 net_local까지 생성함
+
+	>> ./03_2_create_provider_net.sh
+
+
 1) ./06_1_nova_boot_endian.sh 실행하여 vUTM 생성
 
 2) nova list 명령을 통해 vUTM의 management ip를 얻음
