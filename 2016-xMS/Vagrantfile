@@ -1,0 +1,31 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+require "../include/vnode.rb"
+
+=begin
+* xMS Network Monitoring Test
+  - DB
+* DB 서버와 One-Box 내부에서 동작하는 monitoring agent가 서로 연결됨
+=end
+
+# Base NAT Port
+BNP=1000
+
+nat_map_default = {}
+sync_folder_default = {}
+
+db   = Node.new("xMS_DB"   , [], 4, 8192, nat_map_default, sync_folder_default, "p1p1")
+db.set_box_name("bradallenfisher/centos6.5")
+
+# list of nodes and switches
+nodes     = [ db ]
+switches  = []  
+
+# Vagrantfile API/syntax version. Don't touch unless you know what you're doing!
+VAGRANTFILE_API_VERSION = "2"
+
+Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
+  create_switches(switches, config)
+  create_nodes(nodes, config)  
+end

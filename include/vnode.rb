@@ -2,12 +2,14 @@ require 'singleton'
 
 class Box
   attr_accessor :name, :user, :pass
+  @@default_name="ubuntu/trusty64"
   
-  def initialize(name, user, pass)
-    @name = name
+  def initialize(user, pass)
+    @name = @@default_name
     @user = user
     @pass = pass
   end
+
 end
 
 class Link
@@ -51,7 +53,7 @@ class Node
     @bridged_interface=bridged_interface
     @bridged_ip=bridged_ip
     @synced_folders=synced_folders
-    @box = Box.new("ubuntu/trusty64", "vagrant", "vagrant")
+    @box = Box.new("vagrant", "vagrant")
     
     # if internal_innterfaces are type of Range, change it to Array
     if internal_interfaces.instance_of? Range
@@ -62,6 +64,10 @@ class Node
   end
   
   def add_shared_folder
+  end
+
+  def set_box_name(name)
+    @box.name = name
   end
   
   def get_hostname

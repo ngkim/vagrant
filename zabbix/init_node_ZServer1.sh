@@ -5,8 +5,8 @@ source "include/print_util.sh"
 ####################################################
 # configurations 
 ####################################################
-IP_ADDR="192.168.10.1/24"
-DB_PASS="ohhberry3333"
+IP_ADDR="211.224.204.211/24"
+DB_PASS="zabbix"
 #---------------------------------------------------
 PHP_INI="/etc/php5/apache2/php.ini"
 ZAB_CONF_PHP="/etc/zabbix/zabbix.conf.php"
@@ -42,7 +42,7 @@ echo "zabbix-server-mysql zabbix-server-mysql/password-confirm password ${DB_PAS
 ####################################################
 print_msg "1. network configuration"
 ####################################################
-sudo ifconfig eth1 ${IP_ADDR} up
+#sudo ifconfig p1p1 ${IP_ADDR} up
 
 list_archives STEP0
 

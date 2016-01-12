@@ -1,0 +1,36 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+require "../include/vnode.rb"
+
+=begin
+* ONEBOX STAGING vTB Configuration
+  - WEB
+  - ORCH
+  - DB
+  - Zabbix
+* CPU와 메모리 사용량에 따라 향후 scale up
+=end
+
+# Base NAT Port
+BNP=1000
+
+nat_map_default = {}
+sync_folder_default = {}
+
+web  = Node.new("WEB"  , [], 4, 8192, nat_map_default, sync_folder_default, "p1p1")
+orch = Node.new("ORCH" , [], 4, 8192, nat_map_default, sync_folder_default, "p1p1")
+db   = Node.new("DB"   , [], 4, 8192, nat_map_default, sync_folder_default, "p1p1")
+zbx  = Node.new("ZBX"  , [], 4, 8192, nat_map_default, sync_folder_default, "p1p1")
+
+# list of nodes and switches
+nodes     = [ web, orch, db, zbx ]
+switches  = []  
+
+# Vagrantfile API/syntax version. Don't touch unless you know what you're doing!
+VAGRANTFILE_API_VERSION = "2"
+
+Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
+  create_switches(switches, config)
+  create_nodes(nodes, config)  
+end
