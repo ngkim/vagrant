@@ -1,0 +1,55 @@
+# ------------------------------------------------------------------------------
+# The loopback network interface
+auto lo
+iface lo inet loopback
+
+# management network
+auto em1
+iface em1 inet static
+    address 10.0.0.101
+    netmask 255.255.255.0
+    network 10.0.0.0
+    broadcast 10.0.0.255
+    gateway 10.0.0.254
+    # dns-* options are implemented by the resolvconf package, if installed
+    dns-nameservers 8.8.8.8
+
+# external network        
+auto em2
+iface em2 inet manual
+    up ip link set dev $IFACE up
+    down ip link set dev $IFACE down
+
+# api network
+auto em3
+iface em3 inet static
+#    address 10.0.0.110
+#    netmask 255.255.255.0
+#    gateway 
+#    # dns-* options are implemented by the resolvconf package, if installed
+#    dns-nameservers 
+
+# guest network
+auto em4
+iface em4 inet manual
+    up ip link set dev $IFACE up
+    down ip link set dev $IFACE down
+
+# hybrid network
+#auto 
+#iface  inet manual
+#    up ip link set dev $IFACE up
+#    down ip link set dev $IFACE down
+
+# LAN 
+auto p1p1
+iface p1p1 inet manual
+    up ip link set dev $IFACE up
+    down ip link set dev $IFACE down
+
+# WAN
+auto p1p2
+iface p1p2 inet manual
+    up ip link set dev $IFACE up
+    down ip link set dev $IFACE down
+    
