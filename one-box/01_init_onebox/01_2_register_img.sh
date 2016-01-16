@@ -6,9 +6,9 @@ register_image() {
   local _IMAGE_LABEL=$1
   local _IMAGE_FILE=$2
 
-  if [ -f images/${_IMAGE_FILE} ]; then
+  if [ -f ${_IMAGE_FILE} ]; then
     cmd="glance image-create --name ${_IMAGE_LABEL} --disk-format $FILEFORMAT \
-        --container-format $CONTAINERFORMAT --visibility $ACCESSVALUE --progress --file images/${_IMAGE_FILE}"
+        --container-format $CONTAINERFORMAT --visibility $ACCESSVALUE --progress --file ${_IMAGE_FILE}"
 #        --container-format=$CONTAINERFORMAT --progress --file images/${_IMAGE_FILE}"
     run_commands $cmd
   fi
@@ -20,10 +20,8 @@ vnf_image_register() {
 
   echo "VNF_LABEL= ${VNF_LABEL}"
   echo "VNF_IMAGE= ${VNF_IMAGE}"
-  if [ -f images/${VNF_IMAGE} ]; then
-    register_image $VNF_LABEL $VNF_IMAGE
-    sleep 3
-  fi
+  register_image $VNF_LABEL $VNF_IMAGE
+  sleep 2
 }
 
 VNF_LABEL="${UTM_VNF_TYPE}-${UTM_NAME}-${UTM_VENDOR}-${UTM_VERSION}"
