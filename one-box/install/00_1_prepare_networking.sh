@@ -75,14 +75,15 @@ config_mgmt_interface() {
 	# ------------------------------------------------------------------------------
 	print_title "internal management network: $NIC"
 	# ------------------------------------------------------------------------------
-	
+        apt-get install -y openvswitch-switch
 	cat > /etc/network/interfaces.d/$NIC.cfg <<EOF
 # management network
-auto $NIC
+allow-ovs $NIC
 iface $NIC inet static
+    ovs_type OVSBridge
     address $MGMT_IP
     netmask $MGMT_SBNET
-    bridge_ports none
+#    bridge_ports none
 EOF
 	ifup $NIC
 }
@@ -121,6 +122,7 @@ EOF
 
 }
 
+apt-get update
 init_network_interfaces
 if [ ! -z $PUBLIC_NIC ]; then
   config_internet_bridge $PUBLIC_NIC $PUBLIC_IP $PUBLIC_SUBNET $PUBLIC_GW $PUBLIC_DNS
