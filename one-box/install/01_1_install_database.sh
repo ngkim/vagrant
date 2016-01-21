@@ -31,7 +31,10 @@ EOF
 }
 
 restart_db() {
-	service mysql restart
+        # 그냥 수행하면 다음 action이 수행되지 않는 문제가 발생
+	echo "service mysql restart ..."
+	service mysql restart &> /dev/null
+	echo "service mysql restart complele"
 }
 
 secure_db_install() {

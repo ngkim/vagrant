@@ -1,6 +1,6 @@
 #!/bin/bash
 
-METHOD_LIST[0]="prepare"
+#METHOD_LIST[0]="prepare"
 METHOD_LIST[1]="install_base"
 METHOD_LIST[2]="install_keystone"
 METHOD_LIST[3]="install_glance"
@@ -22,10 +22,10 @@ else
  mode=$1 
 fi
 
-prepare() {
-  ./00_1_prepare_networking.sh
-  ./00_2_prepare_repository.sh
-}
+#prepare() {
+#  ./00_1_prepare_networking.sh
+#  ./00_2_prepare_repository.sh
+#}
 
 install_base() {
   ./01_1_install_database.sh
@@ -116,8 +116,9 @@ run() {
   mode=$1
 
   for idx in ${!METHOD_LIST[@]}; do
+    printf "%d\n" $idx
     method=${METHOD_LIST[$idx]}
-
+    printf "%s\n" $method
     printf "%-100s\n" "------------------------------------------------------------------------"
     printf "===     RUN %-56s ===\n" $method
     printf "%-100s\n" "------------------------------------------------------------------------"

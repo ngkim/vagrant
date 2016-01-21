@@ -22,7 +22,7 @@ nat_map_openstack = {"web" => { 80    => BNP+80 }}
 sync_folder_default = {}
 sync_folder_openstack = {}     
 
-onebox = Node.new("One-Box" , [1], 8, 4096, nat_map_openstack, sync_folder_openstack, "wlan0")
+onebox = Node.new("One-Box" , [1], 8, 4096, nat_map_openstack, sync_folder_openstack, "p1p1")
 client = Node.new("Client"  , [1], 2, 2048, nat_map_default, sync_folder_default)
 
 # list of nodes and switches
