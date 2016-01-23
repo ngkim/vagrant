@@ -1,0 +1,4 @@
+#cloud-config
+hostname: WiMS_Controller
+fqdn: wims.onebox.kt.com
+manage_etc_hosts: true
