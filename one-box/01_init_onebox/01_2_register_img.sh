@@ -20,7 +20,13 @@ vnf_image_register() {
 
   echo "VNF_LABEL= ${VNF_LABEL}"
   echo "VNF_IMAGE= ${VNF_IMAGE}"
-  register_image $VNF_LABEL $VNF_IMAGE
+
+  image_id=`glance image-list | grep $VNF_LABEL | awk '{print $2}'`
+  if [ -z $image_id ]; then
+    register_image $VNF_LABEL $VNF_IMAGE
+  else
+    echo "Glance has image $VNF_LABEL ($image_id)"
+  fi
   sleep 2
 }
 
