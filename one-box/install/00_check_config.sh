@@ -1,5 +1,5 @@
 WORK_HOME=/vagrant
-WORK_HOME=/root/workspace/vagrant/one-box
+WORK_HOME=/root/one-box
 
 source "$WORK_HOME/config/default.cfg"
 source "$WORK_HOME/include/print_util.sh"

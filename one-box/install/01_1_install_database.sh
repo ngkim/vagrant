@@ -26,11 +26,15 @@ innodb_file_per_table
 collation-server = utf8_general_ci
 init-connect = 'SET NAMES utf8'
 character-set-server = utf8
+max_connections = 2000
 EOF
 }
 
 restart_db() {
-	service mysql restart
+        # 그냥 수행하면 다음 action이 수행되지 않는 문제가 발생
+	echo "service mysql restart ..."
+	service mysql restart &> /dev/null
+	echo "service mysql restart complele"
 }
 
 secure_db_install() {
@@ -41,19 +45,21 @@ secure_db_install() {
 	# run following commands instead of mysql_secure_installation
 	#---------------------------------------------------------------------------------
 	# Make sure that NOBODY can access the server without a password
-	mysql -u root -p${DB_ADMIN_PASS} -e "UPDATE mysql.user SET Password = PASSWORD('${DB_ADMIN_PASS}') WHERE User = 'root'"
-
 	# remove_anonymous_users
-	mysql -u root -p${DB_ADMIN_PASS} -e "DELETE FROM mysql.user WHERE User=''"
-	
 	# remove_remote_root
-	mysql -u root -p${DB_ADMIN_PASS} -e "DELETE FROM mysql.user WHERE User='root' AND Host NOT IN ('localhost', '127.0.0.1', '::1');"
-
 	# remove_test_database
+	mysql -u root -p${DB_ADMIN_PASS} -e "UPDATE mysql.user SET Password = PASSWORD('${DB_ADMIN_PASS}') WHERE User = 'root'"
+	mysql -u root -p${DB_ADMIN_PASS} -e "DELETE FROM mysql.user WHERE User=''"
+	mysql -u root -p${DB_ADMIN_PASS} -e "DELETE FROM mysql.user WHERE User='root' AND Host NOT IN ('localhost', '127.0.0.1', '::1');"
 	mysql -u root -p${DB_ADMIN_PASS} -e "DROP DATABASE IF EXISTS test;"
+	mysql -u root -p${DB_ADMIN_PASS} -e "FLUSH PRIVILEGES"
 	
 	# Make our changes take effect
-	mysql -u root -p${DB_ADMIN_PASS} -e "FLUSH PRIVILEGES"
+	#mysql -u root -e "UPDATE mysql.user SET Password = PASSWORD('${DB_ADMIN_PASS}') WHERE User = 'root'"
+	#mysql -u root -e "DELETE FROM mysql.user WHERE User=''"
+	#mysql -u root -e "DELETE FROM mysql.user WHERE User='root' AND Host NOT IN ('localhost', '127.0.0.1', '::1');"
+	#mysql -u root -e "DROP DATABASE IF EXISTS test;"
+	#mysql -u root -e "FLUSH PRIVILEGES"
 	# Any subsequent tries to run queries this way will get access denied because lack of usr/pwd param
 	#---------------------------------------------------------------------------------
 }

@@ -2,6 +2,12 @@
 
 source "./00_check_config.sh"
 
+source "./onebox.cfg"
+
+if [ -z ${OS_AUTH_URL+x} ]; then
+    source ~/admin-openrc.sh
+fi
+
 register_image() {
   local _IMAGE_LABEL=$1
   local _IMAGE_FILE=$2

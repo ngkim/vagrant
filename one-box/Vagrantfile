@@ -14,19 +14,19 @@ require "../include/vnode.rb"
 =end
 
 # Base NAT Port
-BNP=1000
+BNP=5000
 
 nat_map_default = {}
-nat_map_openstack = {"web" => { 80    => BNP+80 }, "mysql" => { 3306    => BNP+3306 }, "novnc" => {6080 => BNP+6080}, "https" => {443 => BNP+443}}
+nat_map_openstack = {"web" => { 80    => BNP+80 }}
 
 sync_folder_default = {}
 sync_folder_openstack = {}     
 
-openstack   = Node.new("OpenStack"  , [1], 8, 8192, nat_map_openstack, sync_folder_openstack, "em1")
-mgmt_sw     = Node.new("MGMT-SW"    , (1..6), 2, 2048, nat_map_default, sync_folder_default, "em2")
+onebox = Node.new("One-Box" , [1], 8, 4096, nat_map_openstack, sync_folder_openstack, "p1p1")
+client = Node.new("Client"  , [1], 2, 2048, nat_map_default, sync_folder_default)
 
 # list of nodes and switches
-nodes     = [ openstack ]
+nodes     = [ onebox, client]
 switches  = []  
 
 # Vagrantfile API/syntax version. Don't touch unless you know what you're doing!
