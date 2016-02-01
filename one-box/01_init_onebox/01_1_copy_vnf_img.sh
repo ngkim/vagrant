@@ -20,7 +20,11 @@ copy_vnf_image() {
   sleep 1
 }
 
-copy_vnf_image ${UTM_VNF_TYPE} ${UTM_VENDOR} ${UTM_IMAGE}
-copy_vnf_image ${WAF_VNF_TYPE} ${WAF_VENDOR} ${WAF_IMAGE}
-copy_vnf_image ${APC_VNF_TYPE} ${APC_VENDOR} ${APC_IMAGE}
-copy_vnf_image ${NMS_VNF_TYPE} ${NMS_VENDOR} ${NMS_IMAGE}
+copy_vnf_images() {
+  copy_vnf_image ${UTM_VNF_TYPE} ${UTM_VENDOR} ${UTM_IMAGE}
+  copy_vnf_image ${WAF_VNF_TYPE} ${WAF_VENDOR} ${WAF_IMAGE}
+  copy_vnf_image ${APC_VNF_TYPE} ${APC_VENDOR} ${APC_IMAGE}
+  copy_vnf_image ${NMS_VNF_TYPE} ${NMS_VENDOR} ${NMS_IMAGE}
+}
+
+copy_vnf_images
