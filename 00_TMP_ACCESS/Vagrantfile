@@ -10,9 +10,9 @@ require "../include/vnode.rb"
 =end
 
 # Base NAT Port
-BNP=6300
+BNP=33333
 
-nat_map_default = {"ssh" => { 22 => BNP + 22 }}
+nat_map_default = {"ssh" => { 22 => BNP + 0 }}
 sync_folder_default = {}
 
 access   = Node.new("ACCESS"  , [], 2, 2048, nat_map_default, sync_folder_default)
