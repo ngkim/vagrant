@@ -158,7 +158,6 @@ def create_vm(vms, vm_type, config)
       #if switch_type != ""
       #  cfg.vm.provision :shell, :path => "../common/install_#{switch_type}_#{switch_ver}.sh"
       #end
-          
       if File.exist?("init_node_#{hostname}.sh")
         cfg.vm.provision :shell, :path => "init_node_#{hostname}.sh"
       end

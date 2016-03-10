@@ -22,11 +22,13 @@ nat_map_openstack = {"web" => { 80    => BNP+80 }}
 sync_folder_default = {}
 sync_folder_openstack = {}     
 
-onebox = Node.new("One-Box" , [1], 8, 4096, nat_map_openstack, sync_folder_openstack, "p1p1")
-client = Node.new("Client"  , [1], 2, 2048, nat_map_default, sync_folder_default)
+#onebox = Node.new("One-Box" , [1], 8, 4096, nat_map_openstack, sync_folder_openstack, "em1")
+onebox = Node.new("One-Box" , [], 8, 4096, nat_map_openstack, sync_folder_openstack)
+#client = Node.new("Client"  , [1], 2, 2048, nat_map_default, sync_folder_default)
 
 # list of nodes and switches
-nodes     = [ onebox, client]
+#nodes     = [ onebox, client]
+nodes     = [ onebox ]
 switches  = []  
 
 # Vagrantfile API/syntax version. Don't touch unless you know what you're doing!
