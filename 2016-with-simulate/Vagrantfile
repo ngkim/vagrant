@@ -18,13 +18,14 @@ BNP=1000
 nat_map_default = {}
 sync_folder_default = {}
 
-node05 = Node.new("NODE05" , [], 2, 2048, nat_map_default, sync_folder_default, "en0")
-node06 = Node.new("NODE06" , [], 2, 2048, nat_map_default, sync_folder_default, "en0")
-node07 = Node.new("NODE07" , [], 2, 2048, nat_map_default, sync_folder_default, "en0")
-node08 = Node.new("NODE08" , [], 2, 2048, nat_map_default, sync_folder_default, "en0")
+node05 = Node.new("NODE05" , [], 2, 2048, nat_map_default, sync_folder_default, "em2")
+node06 = Node.new("NODE06" , [], 2, 2048, nat_map_default, sync_folder_default, "em2")
+node07 = Node.new("NODE07" , [], 2, 2048, nat_map_default, sync_folder_default, "em2")
+node08 = Node.new("NODE08" , [], 2, 2048, nat_map_default, sync_folder_default, "em2")
+node30 = Node.new("NODE30" , [], 2, 2048, nat_map_default, sync_folder_default, "em2")
 
 # list of nodes and switches
-nodes     = [ node05, node06, node07, node08 ]
+nodes     = [ node05, node06, node07, node08, node30 ]
 switches  = []  
 
 # Vagrantfile API/syntax version. Don't touch unless you know what you're doing!

@@ -18,7 +18,7 @@ BNP=1000
 nat_map_default = {}
 sync_folder_default = {}
 
-web  = Node.new("WEB"  , [], 4, 8192, nat_map_default, sync_folder_default, "p1p1")
+web  = Node.new("WEB"  , [], 4, 8192, nat_map_default, sync_folder_default, "em1")
 orch = Node.new("ORCH" , [], 4, 8192, nat_map_default, sync_folder_default, "p1p1")
 db   = Node.new("DB"   , [], 4, 8192, nat_map_default, sync_folder_default, "p1p1")
 zbx  = Node.new("ZBX"  , [], 4, 8192, nat_map_default, sync_folder_default, "p1p1")
