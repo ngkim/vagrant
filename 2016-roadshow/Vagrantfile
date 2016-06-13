@@ -1,0 +1,29 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+require "../include/vnode.rb"
+
+=begin
+* 2016 로드쇼용 OneBox 제어 시스템 
+  - WEB
+=end
+
+# Base NAT Port
+BNP=3000
+
+nat_map_default = {}
+sync_folder_default = {}
+
+web  = Node.new("WEB"  , [], 4, 8192, nat_map_default, sync_folder_default, "p2p1")
+
+# list of nodes and switches
+nodes     = [ web ]
+switches  = []  
+
+# Vagrantfile API/syntax version. Don't touch unless you know what you're doing!
+VAGRANTFILE_API_VERSION = "2"
+
+Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
+  create_switches(switches, config)
+  create_nodes(nodes, config)  
+end

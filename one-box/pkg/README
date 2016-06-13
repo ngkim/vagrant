@@ -1,0 +1,19 @@
+# Git needed to retrieve OpenStack code
+apt-get install -y git-core
+
+# Python is installed by default on an Ubuntu Server
+
+# install easy_install
+apt-get install python-setuptools
+
+# install pip - Package Management System   Uses Python Package Index (PyPI)
+easy_install pip
+
+# Install tox - Python automated and standardized testing
+pip install tox
+
+# Python Developer Libraries
+apt-get install -y python-dev
+
+# Openstack developer dependencies
+apt-get install -y libffi-dev libssl-dev libldap2-dev libffi-dev libsasl2-dev libxslt1-dev libxml2-dev

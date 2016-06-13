@@ -1,0 +1,5 @@
+pbr
+pyrestful
+tornado
+paramiko
+psycopg2
